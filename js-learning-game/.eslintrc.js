@@ -3,6 +3,5 @@ module.exports = {
   parserOptions: {
     requireConfigFile: false,
   },
-  extends: ["vue", "standard", "plugin:vue/recommended"],
-  plugins: ["import", "vue"]
+  extends: ['plugin:vue/vue3-recommended'],
 };
