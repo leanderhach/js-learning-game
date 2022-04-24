@@ -1,0 +1,58 @@
+{
+  "name": "js-learning-game",
+  "version": "0.1.0",
+  "private": true,
+  "scripts": {
+    "serve": "vue-cli-service serve",
+    "build": "vue-cli-service build",
+    "lint": "vue-cli-service lint"
+  },
+  "dependencies": {
+    "@fortawesome/fontawesome-svg-core": "^6.1.1",
+    "@fortawesome/pro-regular-svg-icons": "^6.1.1",
+    "@fortawesome/pro-solid-svg-icons": "^6.1.1",
+    "@fortawesome/vue-fontawesome": "^3.0.0-5",
+    "@vue/cli": "^5.0.4",
+    "core-js": "^3.6.5",
+    "fs": "0.0.1-security",
+    "html-webpack-plugin": "^5.5.0",
+    "marked": "^4.0.14",
+    "monaco-editor": "^0.33.0",
+    "monaco-editor-webpack-plugin": "^7.0.1",
+    "sass": "^1.50.1",
+    "sass-loader": "^10.1.1",
+    "tiny-emitter": "^2.1.0",
+    "uuid": "^8.3.2",
+    "vue": "^3.0.0",
+    "vuex": "^4.0.2"
+  },
+  "devDependencies": {
+    "@vue/cli-plugin-babel": "^5.0.4",
+    "@vue/cli-plugin-eslint": "^5.0.4",
+    "@vue/cli-service": "^5.0.4",
+    "@vue/compiler-sfc": "^3.0.0",
+    "babel-eslint": "^10.1.0",
+    "eslint": "^8.13.0",
+    "eslint-plugin-vue": "^7.0.0",
+    "raw-loader": "^4.0.2"
+  },
+  "eslintConfig": {
+    "root": true,
+    "env": {
+      "node": true
+    },
+    "extends": [
+      "plugin:vue/vue3-essential",
+      "eslint:recommended"
+    ],
+    "parserOptions": {
+      "parser": "babel-eslint"
+    },
+    "rules": {}
+  },
+  "browserslist": [
+    "> 1%",
+    "last 2 versions",
+    "not dead"
+  ]
+}
