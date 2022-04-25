@@ -3,24 +3,25 @@
   <div class="rmm content-box">
     <div class="rmm__robots">
       <div
-        v-for="(robot, key) in robots"
+        v-for="(template, key) in robotTemplates"
         :key="key"
         class="clickable-card"
-        @click="editRobot(robot.id)"
       >
         <h4 class="title">
-          {{ robot.name }}
+          {{ template.name }}
         </h4>
         <p class="text">
-          {{ robot.id }}
+          {{ template.id }}
         </p>
+
+        <button class="button" @click="constructRobot(template.id)">Make Bot</button>
+        <button class="button" @click="editRobot(template.id)">Edit Bot</button>
       </div>
     </div>
     <div class="rmm__add">
-      <div class="clickable-card">
+      <div class="clickable-card" @click="makeRobotTemplate">
         <font-awesome-icon
           icon="plus"
-          @click="createRobot"
         />
       </div>
     </div>
@@ -31,6 +32,7 @@
 import { useStore } from 'vuex';
 import { computed } from 'vue';
 import emitter from 'tiny-emitter/instance'
+
 export default {
     name: 'RobotMakerMenu',
     components: {
@@ -38,20 +40,25 @@ export default {
     },
     setup(props) {
         const store = useStore();
-        const robots = computed(() => store.state.robots);
+        const robotTemplates = computed(() => store.state.robotTemplates);
 
         const editRobot = (id) => {
             emitter.emit('editRobot', id);
         }
 
-        const createRobot = () => {
-            emitter.emit('createRobot');
+        const makeRobotTemplate = () => {
+            emitter.emit('makeRobotTemplate');
+        }
+
+        const constructRobot = (id) => {
+          emitter.emit('constructRobot', id);
         }
 
         return {
-            robots,
+            robotTemplates,
             editRobot,
-            createRobot
+            constructRobot,
+            makeRobotTemplate
         }
     }
 }

@@ -68,7 +68,7 @@ export default {
 
             if(robotName.value.trim().length > 0) {
                 let newRobot = new Robot(robotName.value, robotColor.value);
-                store.commit('addRobot', newRobot);
+                store.commit('addRobotTemplate', newRobot);
                 emitter.emit('editRobot', newRobot.id)
             }
         }

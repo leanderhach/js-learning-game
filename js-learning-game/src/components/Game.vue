@@ -14,7 +14,9 @@ import { useStore } from 'vuex';
 import { getRandomInt } from '../utils/math';
 import { getSprite } from '../utils/file';
 import Iron from '../assets/js/resources/Iron';
+import Cobalt from '../assets/js/resources/Cobalt';
 import Robot from '../assets/js/robots/Robot';
+import emitter from 'tiny-emitter/instance'
 
 export default {
     name: 'Game',
@@ -22,44 +24,77 @@ export default {
         const gameCanvas = ref(null);
         let gameContext = ref(null);
 
-        console.log(gameCanvas);
-
         const store = useStore();
 
         let currentLevel = computed(() => store.state.chapterFile);
         let oldLevel = ref(null);
 
-        let resources = [];
+        const handleRobotInstanceMessages = (e) => {
+            console.log('responded!');
+            console.log(e);
+        }
+
+
+        // robot creation events
+        emitter.on('constructRobot', (id) => {
+            let robot = store.state.robotTemplates.find(robot => robot.id === id);
+
+            if (robot) {
+                let robotInstance = new Worker('/workers/RobotWorker.js');
+
+                // add an event listener to the new worker
+                robotInstance.onmessage = (e) => {
+                    handleRobotInstanceMessages(e)
+                };
+
+                store.commit('createRobotWorkerAndInstance', {instance: robotInstance, template: robot});
+            }
+        })
+        
 
         const drawMothership = () => {
             // draw the mothership. This will remain the same the entire game.
-            gameContext.value.fillStyle = 'red';
-            gameContext.value.fillRect(1920/2, 1080/2, 50, 50);
+            gameContext.fillStyle = 'red';
+            gameContext.fillRect(1920/2, 1080/2, 50, 50);
+        }
+
+        // resource creation functions
+        const makeResource = (count, type) => {
+
+            let resources = [];
+
+            for(let i = 0; i < count; i++) {
+                let posX = getRandomInt(gameCanvas.value.width - 100);
+                let posY = getRandomInt(gameCanvas.value.height - 100);
+
+                switch (type) {
+                    case 'iron':
+                        resources.push(new Iron(posX, posY));
+                        break;
+
+                    case 'cobalt':
+                        resources.push(new Cobalt(posX, posY));
+                        break;
+                }
+            }
+
+            store.commit('addResources', resources);
         }
 
         const drawResources = async () => {
-            for (let resource of resources) {
-                console.log(resource)
+            for (let resource of store.state.resources) {
+                let image;
+
                 switch (resource.type) {
                     case 'Iron':
-                        console.log('drawing iron')
-                        // let image = await getSprite('resources', 'iron.svg');
-                        // console.log('got sprite');
-                        // console.log(image);
-
-                        var image = new Image();
-
-                        let img = await fetch('/sprites/resources/iron.svg');
-                        await img.blob();
-
-                        console.log(img);
-
-                        image.onload = () => {
-                            console.log('image')
-                            console.log(image)
-                            gameContext.value.drawImage(image, resource.position.x, resource.position.y, 20, 20);
-                        }
-                        image.src = '/sprites/resources/iron.svg';
+                        image = await getSprite('resources', 'iron.png');
+                        gameContext.drawImage(image, resource.position.x, resource.position.y, 20, 20);
+                        break;
+                    
+                    case 'Cobalt':
+                        image = await getSprite('resources', 'cobalt.png');
+                        gameContext.drawImage(image, resource.position.x, resource.position.y, 20, 20);
+                        break;
                 }
             }
         }
@@ -72,13 +107,22 @@ export default {
         const changeLevel = () => {
             switch (currentLevel.value) {
                 case 'level1':
-                    console.log('spawning rocks...');
-                    //spawn 10 iron rocks
-                    for(let i = 0; i < 10; i++) {
-                        let posX = getRandomInt(gameCanvas.value.width - 100);
-                        let posY = getRandomInt(gameCanvas.value.height - 100);
-                        resources.push(new Iron(posX, posY));
+                    console.log('level 1!');
+                    makeResource(10, 'iron');
+                    break;
+                
+                case 'level2':
+
+                    console.log('spawning cobalt...');
+                    const resourcesLeft = resources;
+                    let ironLeft = resources.filter(resource => resource.type === 'Iron').length;
+
+                    if(ironLeft < 3) {
+                        makeResource(15, 'iron');
                     }
+
+                    makeResource(30, 'cobalt');
+                    break;
             }
 
             oldLevel.value = currentLevel.value;
@@ -96,13 +140,13 @@ export default {
 
             // clear the canvas
 
-            console.log('clearing canvas')
-            gameContext.value.clearRect(0, 0, gameCanvas.value.width, gameCanvas.value.height);
+            console.log('clearing canvas');
+            gameContext.clearRect(0, 0, gameCanvas.value.width, gameCanvas.value.height);
 
-            console.log('drawing mothership')
+            console.log('drawing mothership');
             drawMothership();
 
-            console.log('drawing resources')
+            console.log('drawing resources');
             drawResources();
         }
 

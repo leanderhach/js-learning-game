@@ -37,7 +37,7 @@ export default {
     setup(props) {
         const store = useStore();
         const chapter = computed(() => store.state.chapterFile);
-        const robots = computed(() => store.state.robots);
+        const robotTemplates = computed(() => store.state.robotTemplates);
 
         let chapterText = ref('');
         let editor = ref(null);
@@ -49,12 +49,12 @@ export default {
         }
 
         const saveRobot = () => {
-            let robot = robots.value.find(robot => robot.id === props.id);
-            let position = robots.value.findIndex(robot => robot.id === props.id);
+            let robot = robotTemplates.value.find(robot => robot.id === props.id);
+            let position = robotTemplates.value.findIndex(robot => robot.id === props.id);
 
             if (robot) {
                 robot.script = JSON.stringify(editor.getValue());
-                robots.value.splice(position, 1, robot);
+                robotTemplates.value.splice(position, 1, robot);
             }
         }
 
@@ -66,12 +66,12 @@ export default {
             const container = document.querySelector('#monaco');
             const parentContainer = document.querySelector('#monaco-container');
             
-            const codePreset = `this.turnOn();\nlet resourcePosition = this.findResource(/*TODO: specify resource*/);
-            \nawait this.navigateTo(/*TODO: where? */);\nthis.collectResource();\nthis.returnHome();`
+            const codePreset = `turnOn();\nlet resourcePosition = findResource(/*TODO: specify resource*/);
+            \nawait navigateTo(/*TODO: where? */);\collectResource();\returnHome();`
 
             // setup monaco
             editor = monaco.editor.create(container, {
-                value: store.state.robots.find(robot => robot.id === props.id).script || codePreset,
+                value: store.state.robotTemplates.find(robot => robot.id === props.id).script || codePreset,
                 language: 'javascript',
                 automaticLayout: true,
                 minimap: { enabled: false },

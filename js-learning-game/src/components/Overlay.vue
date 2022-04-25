@@ -43,7 +43,7 @@ export default {
             isActive.value = true;
         })
 
-        emitter.on('createRobot', () => {
+        emitter.on('makeRobotTemplate', () => {
             activeView.value = 'createRobot',
             isActive.value = true;
         })
