@@ -4,4 +4,5 @@ module.exports = {
     requireConfigFile: false,
   },
   extends: ['plugin:vue/vue3-recommended'],
+  plugins: ['vue']
 };
