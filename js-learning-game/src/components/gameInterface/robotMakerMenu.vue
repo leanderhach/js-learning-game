@@ -1,18 +1,30 @@
 <template>
-    <!-- Robot Maker Menu -->
-    <div class="rmm content-box">
-        <div class="rmm__robots">
-            <div class="clickable-card" v-for="(robot, key) in robots" :key="key" @click="editRobot(robot.id)">
-                <h4 class="title">{{ robot.name }}</h4>
-                <p class="text">{{ robot.id }}</p>
-            </div>
-        </div>
-        <div class="rmm__add">
-            <div class="clickable-card">
-                <font-awesome-icon icon="plus" @click="createRobot"></font-awesome-icon>
-            </div>
-        </div>
+  <!-- Robot Maker Menu -->
+  <div class="rmm content-box">
+    <div class="rmm__robots">
+      <div
+        v-for="(robot, key) in robots"
+        :key="key"
+        class="clickable-card"
+        @click="editRobot(robot.id)"
+      >
+        <h4 class="title">
+          {{ robot.name }}
+        </h4>
+        <p class="text">
+          {{ robot.id }}
+        </p>
+      </div>
     </div>
+    <div class="rmm__add">
+      <div class="clickable-card">
+        <font-awesome-icon
+          icon="plus"
+          @click="createRobot"
+        />
+      </div>
+    </div>
+  </div>
 </template>
 
 <script>
@@ -20,7 +32,7 @@ import { useStore } from 'vuex';
 import { computed } from 'vue';
 import emitter from 'tiny-emitter/instance'
 export default {
-    name: 'robotMakerMenu',
+    name: 'RobotMakerMenu',
     components: {
 
     },

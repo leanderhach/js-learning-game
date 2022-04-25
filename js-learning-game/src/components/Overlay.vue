@@ -1,8 +1,19 @@
 <template>
-    <div id="overlay-container" :class="[{'is-active': isActive}]" @click.self="toggleOverlay">
-        <CreateRobot v-if="activeView === 'createRobot'" class="overlay-content"></CreateRobot>
-        <EditRobot v-if="activeView === 'editRobot'" :id="editRobotID" class="overlay-content"></EditRobot>
-    </div>
+  <div
+    id="overlay-container"
+    :class="[{'is-active': isActive}]"
+    @click.self="toggleOverlay"
+  >
+    <CreateRobot
+      v-if="activeView === 'createRobot'"
+      class="overlay-content"
+    />
+    <EditRobot
+      v-if="activeView === 'editRobot'"
+      :id="editRobotID"
+      class="overlay-content"
+    />
+  </div>
 </template>
 
 <script>
@@ -12,7 +23,7 @@ import CreateRobot from './overlay/createRobot.vue';
 import EditRobot from './overlay/editRobot.vue';
 
 export default {
-    name: 'overlay',
+    name: 'Overlay',
     components: {
         CreateRobot,
         EditRobot

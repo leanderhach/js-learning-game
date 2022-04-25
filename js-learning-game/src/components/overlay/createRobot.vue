@@ -1,23 +1,42 @@
 <template>
-    <div id="overlay-body">
-        <h2 class="title">Create Robot</h2>
-        <div class="form-input">
-            <label for="robotName" class="label">Name</label>
-            <input type="text" class="input" id="robotName" v-model="robotName">
-        </div>
-        <div class="form-input">
-            <label for="robotName" class="label">Color</label>
-            <div class="color-grid">
-                <div v-for="(color, key) in colors" :key="key" 
-                    :class="['color', {'is-active': key === colorKey}]" 
-                    :style="`background-color:var(${color}`"
-                    @click="setColor(color, key)"
-                >
-                </div>
-            </div>
-        </div>
-        <button class="button" @click="createRobot">Create Robot</button>
+  <div id="overlay-body">
+    <h2 class="title">
+      Create Robot
+    </h2>
+    <div class="form-input">
+      <label
+        for="robotName"
+        class="label"
+      >Name</label>
+      <input
+        id="robotName"
+        v-model="robotName"
+        type="text"
+        class="input"
+      >
     </div>
+    <div class="form-input">
+      <label
+        for="robotName"
+        class="label"
+      >Color</label>
+      <div class="color-grid">
+        <div
+          v-for="(color, key) in colors"
+          :key="key" 
+          :class="['color', {'is-active': key === colorKey}]" 
+          :style="`background-color:var(${color}`"
+          @click="setColor(color, key)"
+        />
+      </div>
+    </div>
+    <button
+      class="button"
+      @click="createRobot"
+    >
+      Create Robot
+    </button>
+  </div>
 </template>
 
 <script>
@@ -27,7 +46,7 @@ import Robot from '../../assets/js/robots/Robot';
 import emitter from 'tiny-emitter/instance';
 
 export default {
-    name: 'createRobot',
+    name: 'CreateRobot',
     setup(props) {
         const store = useStore();
 

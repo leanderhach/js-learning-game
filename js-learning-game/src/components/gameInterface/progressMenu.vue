@@ -1,11 +1,11 @@
 <template>
-    <!-- Progress Menu -->
-    <div class="pm content-box">
-        <h4 class="title">Progress</h4>
-        <div class="pm__bars">
-
-        </div>
-    </div>
+  <!-- Progress Menu -->
+  <div class="pm content-box">
+    <h4 class="title">
+      Progress
+    </h4>
+    <div class="pm__bars" />
+  </div>
 </template>
 
 <script>
@@ -13,7 +13,7 @@ import { computed } from '@vue/runtime-core';
 import { useStore } from 'vuex';
 
 export default {
-    name: 'progressMenu',
+    name: 'ProgressMenu',
     setup(props) {
         const store = useStore();
 

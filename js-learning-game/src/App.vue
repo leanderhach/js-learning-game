@@ -1,8 +1,8 @@
 <template>
   <div id="app-container">
-    <GameInterface></GameInterface>
-    <Game></Game>
-    <Overlay></Overlay>
+    <GameInterface />
+    <Game />
+    <Overlay />
   </div>
 </template>
 

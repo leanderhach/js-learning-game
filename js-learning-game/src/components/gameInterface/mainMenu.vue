@@ -1,26 +1,34 @@
 <template>
-    <!-- Main Menu -->
-    <div class="mm content-box">
-        <div class="mm__options">
-            <nav class="options__nav">
-                <button class="invisible-button">
-                    <font-awesome-icon icon="cog"></font-awesome-icon>
-                </button>
-                <button class="invisible-button" v-if="isPlaying" @click="togglePlaying">
-                    <font-awesome-icon icon="pause"></font-awesome-icon>
-                </button>
-                <button class="invisible-button" v-else @click="togglePlaying">
-                    <font-awesome-icon icon="play"></font-awesome-icon>
-                </button>
-                <button class="invisible-button">
-                    <font-awesome-icon icon="circle-info"></font-awesome-icon>
-                </button>
-            </nav>
-        </div>
-        <div class="mm__brief">
-            {{ missionBrief }}
-        </div>
+  <!-- Main Menu -->
+  <div class="mm content-box">
+    <div class="mm__options">
+      <nav class="options__nav">
+        <button class="invisible-button">
+          <font-awesome-icon icon="cog" />
+        </button>
+        <button
+          v-if="isPlaying"
+          class="invisible-button"
+          @click="togglePlaying"
+        >
+          <font-awesome-icon icon="pause" />
+        </button>
+        <button
+          v-else
+          class="invisible-button"
+          @click="togglePlaying"
+        >
+          <font-awesome-icon icon="play" />
+        </button>
+        <button class="invisible-button">
+          <font-awesome-icon icon="circle-info" />
+        </button>
+      </nav>
     </div>
+    <div class="mm__brief">
+      {{ missionBrief }}
+    </div>
+  </div>
 </template>
 
 <script>
@@ -28,7 +36,7 @@ import { computed } from '@vue/runtime-core';
 import { useStore } from 'vuex';
 
 export default {
-    name: 'mainMenu',
+    name: 'MainMenu',
     setup(props, { expose }) {
         const store = useStore();
         const isPlaying = computed(() => store.state.isPlaying);

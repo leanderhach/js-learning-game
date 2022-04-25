@@ -1,16 +1,16 @@
 <template>
-    <main>
-        <div class="columns">
-            <div class="column">
-                <MainMenu></MainMenu>
-                <RobotMakerMenu></RobotMakerMenu>
-            </div>
-            <div class="column"></div>
-            <div class="column">
-                <ProgressMenu></ProgressMenu>
-            </div>
-        </div>
-    </main>
+  <main>
+    <div class="columns">
+      <div class="column">
+        <MainMenu />
+        <RobotMakerMenu />
+      </div>
+      <div class="column" />
+      <div class="column">
+        <ProgressMenu />
+      </div>
+    </div>
+  </main>
 </template>
 
 <script>

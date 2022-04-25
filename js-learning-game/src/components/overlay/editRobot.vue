@@ -1,15 +1,26 @@
 <template>
-    <div id="overlay-body">
-        <div class="editor" id="#monaco-container">
-            <div id="monaco"></div>
-        </div>
-        <div class="instructions">
-            <div class="chapter-text" v-html="chapterText"></div>
-        </div>
-        <div class="button-row">
-            <button class="button" @click="saveRobot">Save</button>
-        </div>
+  <div id="overlay-body">
+    <div
+      id="#monaco-container"
+      class="editor"
+    >
+      <div id="monaco" />
     </div>
+    <div class="instructions">
+      <div
+        class="chapter-text"
+        v-html="chapterText"
+      />
+    </div>
+    <div class="button-row">
+      <button
+        class="button"
+        @click="saveRobot"
+      >
+        Save
+      </button>
+    </div>
+  </div>
 </template>
 
 <script>
@@ -19,7 +30,7 @@ import { computed, onMounted, ref } from '@vue/runtime-core';
 import { marked } from 'marked';
 
 export default {
-    name: 'editRobot',
+    name: 'EditRobot',
     props: {
         id: String,
     },

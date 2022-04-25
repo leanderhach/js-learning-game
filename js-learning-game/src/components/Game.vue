@@ -1,7 +1,11 @@
 <template>
-    <div id="game-container">
-        <canvas height="1080" width="1920" ref="gameCanvas"></canvas>
-    </div>
+  <div id="game-container">
+    <canvas
+      ref="gameCanvas"
+      height="1080"
+      width="1920"
+    />
+  </div>
 </template>
 
 <script>
@@ -29,8 +33,8 @@ export default {
 
         const drawMothership = () => {
             // draw the mothership. This will remain the same the entire game.
-            gameContext.fillStyle = 'red';
-            gameContext.fillRect(1920/2, 1080/2, 50, 50);
+            gameContext.value.fillStyle = 'red';
+            gameContext.value.fillRect(1920/2, 1080/2, 50, 50);
         }
 
         const drawResources = async () => {
@@ -53,7 +57,7 @@ export default {
                         image.onload = () => {
                             console.log('image')
                             console.log(image)
-                            gameContext.drawImage(image, resource.position.x, resource.position.y, 20, 20);
+                            gameContext.value.drawImage(image, resource.position.x, resource.position.y, 20, 20);
                         }
                         image.src = '/sprites/resources/iron.svg';
                 }
@@ -84,7 +88,7 @@ export default {
 
             // check if the level needs to be changed
             console.log('Starting game loop');
-            if (currentLevel !== oldLevel) {
+            if (currentLevel.value !== oldLevel.value) {
 
                 console.log('changing level');
                 changeLevel();
@@ -93,7 +97,7 @@ export default {
             // clear the canvas
 
             console.log('clearing canvas')
-            gameContext.clearRect(0, 0, gameCanvas.value.width, gameCanvas.value.height);
+            gameContext.value.clearRect(0, 0, gameCanvas.value.width, gameCanvas.value.height);
 
             console.log('drawing mothership')
             drawMothership();
