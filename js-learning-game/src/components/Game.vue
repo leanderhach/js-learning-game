@@ -13,6 +13,7 @@ import { computed, onMounted, onUpdated, ref } from 'vue';
 import { useStore } from 'vuex';
 import { getRandomInt } from '../utils/math';
 import { getSprite } from '../utils/file';
+import timeout from '../utils/timeout';
 import Iron from '../assets/js/resources/Iron';
 import Cobalt from '../assets/js/resources/Cobalt';
 import Robot from '../assets/js/robots/Robot';
@@ -22,16 +23,33 @@ export default {
     name: 'Game',
     setup(props, { expose }) {
         const gameCanvas = ref(null);
-        let gameContext = ref(null);
+        let gameContext = null;
 
         const store = useStore();
 
         let currentLevel = computed(() => store.state.chapterFile);
         let oldLevel = ref(null);
 
-        const handleRobotInstanceMessages = (e) => {
-            console.log('responded!');
-            console.log(e);
+        const handleRobotInstanceMessages = async (e) => {
+
+            switch(e.data.type) {
+                case 'updateRobot':
+                    store.commit('updateRobotInstance', e.data.robot);
+                    break;
+                case 'resourceListUpdate':
+                    store.commit('updateResourceList', e.data.resources);
+                    break;
+                case 'doneWork':
+                    console.log('called done');
+                    store.commit('doneWork', e.data.robot);
+                    break;
+                
+                case 'unloadStoredResources':
+                    store.commit('workerUnloadStoredResources', e.data.robot);
+                    break;
+                case 'log':
+                    console.log(e.data.message);
+            }
         }
 
 
@@ -99,16 +117,36 @@ export default {
             }
         }
 
+        const drawBots = async () => {
+            for (let robot of store.state.robotInstances) {
+                let image = await getSprite('robots', 'basic_robot.png');
+                gameContext.drawImage(image, robot.position.x, robot.position.y, 15, 15);
+            }
+        }
+
         const initGame = () => {
             gameContext = gameCanvas.value.getContext('2d');
             gameLoop();
         }
 
         const changeLevel = () => {
+            let requirements;
             switch (currentLevel.value) {
                 case 'level1':
                     console.log('level 1!');
                     makeResource(10, 'iron');
+
+                    // set the resource requirements for this level
+                    requirements = [
+                        {
+                            type: 'Iron',
+                            quota: 10,
+                            harvested: 0,
+                        }
+                    ];
+
+                    store.commit('setLevelRequirements', requirements);
+
                     break;
                 
                 case 'level2':
@@ -131,32 +169,24 @@ export default {
         const gameLoop = async () => {
 
             // check if the level needs to be changed
-            console.log('Starting game loop');
             if (currentLevel.value !== oldLevel.value) {
-
-                console.log('changing level');
                 changeLevel();
             }
 
             // clear the canvas
-
-            console.log('clearing canvas');
             gameContext.clearRect(0, 0, gameCanvas.value.width, gameCanvas.value.height);
 
-            console.log('drawing mothership');
             drawMothership();
-
-            console.log('drawing resources');
             drawResources();
+            drawBots();
+
+            // update on frame
+            window.requestAnimationFrame(gameLoop);
         }
 
         onMounted(() => {
             initGame();
         });
-
-        onUpdated(() => {
-            gameLoop();
-        })
 
         return {
             gameCanvas,

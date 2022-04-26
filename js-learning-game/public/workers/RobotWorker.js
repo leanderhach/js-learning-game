@@ -1,39 +1,154 @@
 // define the robot that the worker will be in charge of
 let robot = null;
+let robotWorker = null;
 
 // define a store for resources, this will be used for navigation calculations
 let resources = null;
 
 // resource the bot is going towards
 let targetResource = null;
+let collectedResource = null;
 
 
-// robot work functions (these need to be here so the robot can communicate via the worker)
-findResource = function (type) {
-    console.log(`looking for ${type}`);
+
+//-------------------------------------------------------------------------//
+// Point class
+//------------------------------------------------------------------------//
+function Point(x, y) {
+    this.x = x;
+    this.y = y;
 }
 
-turnOn = function () {
-    this.on = true;
-}
+Point.prototype.toString = function () {
+    return `(${this.x}, ${this.y})`;
+};
 
-turnOff = function () {
-    this.on = false;
-}
-
-collectResource = function () {
-    const store = useStore();
-
-    if (store.state.resources.find(resource => resource.position == robot.position)) {
-        console.log(`found ${resource}!`)
+Point.prototype.isSameAs = function (point) {
+    if (
+        this.x == point.x &&
+        this.y == point.y
+    ) {
+        return true;
     }
+
+    return false;
 }
 
-navigateToLocation = async function (location, startPoint, passedTime) {
+
+//-------------------------------------------------------------------------//
+// Macros
+//------------------------------------------------------------------------//
+const timeout = ms => new Promise(resolve => setTimeout(resolve, ms));
+const AsyncFunction = Object.getPrototypeOf(async function () { }).constructor;
+
+
+//-------------------------------------------------------------------------//
+// Math functions
+//------------------------------------------------------------------------//
+
+// linear interpolation between points given progress
+function lerp(initialPoint, finalPoint, progress) {
+    return initialPoint + (finalPoint - initialPoint) * progress;
+}
+
+// calculate the distance between two Points in space
+function distanceBetweenPoints(initialPoint, destinationPoint) {
+    let x1 = initialPoint.x;
+    let y1 = initialPoint.y;
+
+    let x2 = destinationPoint.x;
+    let y2 = destinationPoint.y;
+    
+    return Math.sqrt(Math.pow((x2 - x1), 2) + Math.pow((y2 - y1), 2));
+}
+
+//-------------------------------------------------------------------------//
+// Print to console function
+//------------------------------------------------------------------------//
+function printMessageToConsole(message) {
+    postMessage({ type: 'log', message: JSON.stringify(message) });
+}
+
+//-------------------------------------------------------------------------//
+// Robot worker class
+//------------------------------------------------------------------------//
+
+function RobotWorker(id) {
+    this.id = id;
+}
+
+RobotWorker.prototype.findResource = function (type) {
+    let resourcesOfType = resources.filter(resource => resource.type === type && !resource.hasCollectorAssigned);
+
+    if (resourcesOfType.length > 0) {
+        rand = Math.floor(Math.random() * resourcesOfType.length);
+        targetResource = resourcesOfType[rand];
+        
+        // set the targetResource position to be a point, since this was stripped when the object
+        // was sent to the worker the first time
+        targetResource.position = new Point(targetResource.position.x, targetResource.position.y);
+
+
+        // update resource array to reflect that a collector has been assigned
+        let pos = resources.map(function (e) { return e.id; }).indexOf(targetResource.id);
+        resources[pos].hasCollectorAssigned = true;
+
+        postMessage({type: 'resourceListUpdate', resources: resources });
+        return targetResource;
+    }
+    return null;
+}
+
+RobotWorker.prototype.turnOn = function () {
+    robot.on = true;
+}
+
+RobotWorker.prototype.turnOff = function () {
+    robot.on = false;
+}
+
+RobotWorker.prototype.collectResource = function () {
+    
+
+    // extrapolate the robot's position. it may be off by += 1
+    let lowX = robot.position.x - 1;
+    let highX = robot.position.x + 1;
+
+    let lowY = robot.position.y - 1;
+    let highY = robot.position.y + 1;
+    
+    if (targetResource.position.x >= lowX
+        && targetResource.position.x <= highX
+        && targetResource.position.y >= lowY
+        && targetResource.position.y <= highY
+    ) {
+        collectedResource = JSON.parse(JSON.stringify(targetResource));
+
+        if (robot.backpack.length <= robot.backpackSize) {
+            robot.backpack.push(collectedResource);
+            let pos = resources.map(function (e) { return e.id; }).indexOf(targetResource.id);
+
+            resources.splice(pos, 1);
+
+            postMessage({ type: 'resourceListUpdate', resources: resources });
+            postMessage({ type: 'updateRobot', robot: robot, instance: robotWorker.id });
+            return true;
+        }
+    }
+
+    return false;
+}
+
+RobotWorker.prototype.navigateToLocation = async function (location, startPoint, passedTime) {
+
+    // if location is null, return home
+    if (!location) {
+        return true;
+    }
 
     // console.log('running navigation');
     // robots can move at a set speed
-    const speed = 20;
+    const speed = 80;
     const initialPosition = startPoint || robot.position; 
     let timeStep = 1 + (passedTime || 0); //Loop counter
 
@@ -49,77 +164,129 @@ navigateToLocation = async function (location, startPoint, passedTime) {
         let nextPoint = new Point(
             lerp(initialPosition.x, location.x, progress),
             lerp(initialPosition.y, location.y, progress)
-        )
+        );
 
         robot.position = nextPoint;
 
-        // 
-        postMessage('movedRobot', robot);
+        postMessage({type: 'updateRobot', robot: robot, instance: robotWorker.id});
         await timeout(16.66);
-        return await navigateToLocation(location, initialPosition, timeStep);
+        return await this.navigateToLocation(location, initialPosition, timeStep);
     } else {
         return true;
     }
 }
 
-///////////////////////////////////////////////////////////////////////////////////////////////
+RobotWorker.prototype.returnHome = async function () {
+    return await this.navigateToLocation(new Point(960, 540));
+}
+
+RobotWorker.prototype.unloadResources = function () {
+    postMessage({ type: 'unloadStoredResources', robot: robot });
+}
+
+RobotWorker.prototype.checkBackpack = function() {
+    return robot.backpack;
+}
+
+RobotWorker.prototype.getBackpackSize = function () {
+    return robot.backpack.length;
+}
+
+RobotWorker.prototype.getName = function () {
+    return `${robot.name}:${robot.id}`;
+}
+
+RobotWorker.prototype.getPosition = function () {
+    return robot.position;
+}
+
+RobotWorker.prototype.toggleDebug = function () {
+    robot.drawDebug = true;
+}
+
+RobotWorker.prototype.getColor = function () {
+    return robot.color;
+}
+//-------------------------------------------------------------------------//
+// Main Loop
+//------------------------------------------------------------------------//
+
+let running = false;
+let shouldContinueRun = true;
+
 async function mainLoop() {
+
     // only run the robot's script if robot setup has been completed
-    if (robot.name && robot.on && resources) {
-        await Object.getPrototypeOf(async function () { }).constructor(robot.script);
-        
+    if (robot.name && robot.script && robotWorker && resources && running === false) {
+
+        running = true;
+        let mainFunc = await new AsyncFunction('robot', 'print', robot.script)(robotWorker, printMessageToConsole);
         // report back that the main loop has been cycled. Should return either continueWork or returnHome
-        postMessage('doneWork', robot);
+        postMessage({ type: 'doneWork', robot: robot });
+        mainFunc = null;
+
+        running = false;
+        return true;
     } else {
-        postMessage('doneWork', robot);
+        postMessage({ type: 'doneWork', robot: robot });
+
+        return true;
     }
 }
+
 
 // define onmessage tasks
 self.onmessage = function (e) {
 
-    self.postMessage(e.data);
-
     // check to make sure its the right robot
-    switch (e.type) {
+    switch (e.data.type) {
 
         // case for the worker completing setup. This should happen close to the worker
         // being created.
         case 'setupRobot':
-            robot = JSON.parse();
-            // resources = e.data[2];
-            postMessage({ message: 'setup complete', response: e.payload/*, robot: robot, resources: resources */ });
-            //mainLoop();
+
+            // create local copy of the robot object that can be safely modified
+            robot = JSON.parse(e.data.template);
+            robot.script = `${JSON.parse(robot.script)}`
+
+            // instantiate robotWorker class
+            robotWorker = new RobotWorker(robot.id);
+            resources = JSON.parse(e.data.resources);
+            postMessage({ message: 'setup complete'});
+            mainLoop();
             break;
 
         // case for the bot completing all tasks and returning home, calling done 
         // and there still being resources avaliable
-        case 'notOutOfResources':
-            robot = e.data[1];
-            resources = e.data[2];
-            mainLoop();
+        case 'outOfResources':
+            resources = JSON.parse(e.data.resources);
+            shouldContinueRun = false;
             break;
 
         // case for the resource list being updated
-        case 'resourceListUpdated':
-            resources = e.data[1];
+        case 'updateResourceList':
+            resources = JSON.parse(e.data.resources);
+            shouldContinueRun = true;
             break;
 
         // case for ordering the robot home
         case 'returnHome':
-            navigateToLocation(new Point(100, 50));
+            robotWorker.returnToHome();
             break;
 
-        // default return to 'workcomplete' message sent from worker
+        // default return to 'doneWork' message sent from worker
         case 'continueWork':
-            robot = e.data[1];
-            resources = e.data[2];
-            mainLoop();
+            if (shouldContinueRun) {
+                robot = JSON.parse(e.data.robotInstance);
+                robot.script = `${JSON.parse(robot.script)}`;
+                resources = JSON.parse(e.data.resources);
+                mainLoop();
+            }
             break;
         
         // case for the robot being updated on the frontend
         case 'updateRobot':
-            robot = e.data[1];
+            robot = JSON.parse(e.data.robotInstance);
             break;
 
     }

@@ -1,7 +1,10 @@
 import Point from '../maths/Point';
+import { v4 as uuidv4 } from 'uuid';
 
 function Resource(type, health, posX, posY, color, shape) {
     this.position = new Point(posX, posY);
+
+    this.id = uuidv4();
 
     this.type = type;
     this.health = health;

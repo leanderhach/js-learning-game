@@ -16,7 +16,11 @@ function Robot(name, color, script, posX, posY) {
 
     this.position = new Point(posX, posY);
     this.on = false;
+
+    this.backpack = [];
+    this.backpackSize = 1;
 }
+
 
 Robot.prototype.toString = function () {
     return `name: ${this.name}, color: ${this.color}`

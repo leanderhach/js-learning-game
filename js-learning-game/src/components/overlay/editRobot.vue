@@ -66,8 +66,8 @@ export default {
             const container = document.querySelector('#monaco');
             const parentContainer = document.querySelector('#monaco-container');
             
-            const codePreset = `turnOn();\nlet resourcePosition = findResource(/*TODO: specify resource*/);
-            \nawait navigateTo(/*TODO: where? */);\collectResource();\returnHome();`
+            const codePreset = `robot.turnOn();\nlet resourcePosition = robot.findResource(/*TODO: specify resource*/);
+            \nawait robot.navigateTo(/*TODO: where? */);\nrobot.collectResource();\nrobot.returnHome();`
 
             // setup monaco
             editor = monaco.editor.create(container, {

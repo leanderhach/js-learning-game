@@ -4,7 +4,14 @@
     <h4 class="title">
       Progress
     </h4>
-    <div class="pm__bars" />
+    <div class="pm__bars">
+      <div class="progress-bar-container" v-for="(requirement, key) of levelRequirements" :key="key">
+        <label :for="requirement + key">{{ requirement.type }}</label>
+        <progress :id="requirement + key" :value="requirement.harvested" :max="requirement.quota">
+          {{ (requirement.harvested / requirement.quota) + "%"}} 
+        </progress>
+      </div>
+    </div>
   </div>
 </template>
 
@@ -17,10 +24,10 @@ export default {
     setup(props) {
         const store = useStore();
 
-        const currentResourceDemands = computed(() => store.state.currentResourceDemands)
+        const levelRequirements = computed(() => store.state.levelRequirements);
 
         return {
-            currentResourceDemands
+            levelRequirements
         }
     }
 }
