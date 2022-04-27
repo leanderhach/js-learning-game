@@ -19,7 +19,7 @@
     </div>
     <div class="cm__toggle content-box content-box__flexible">
       <div class="clickable-card" @click="toggleOpen">
-        <span v-if="alertCount > 0" class="alert-count">{{ (alertCount <= 50) ? alertCount : `${alterCount}+` }}</span>
+        <span v-if="alertCount > 0" class="alert-count">{{ alertCountFormatted }}</span>
         <img class="icon icon__lg" src="/icons/rectangle-terminal.svg">
       </div>
     </div>
@@ -59,13 +59,18 @@ export default {
             alertCount.value = 0;
         }
 
+        const alertCountFormatted = computed(() => {
+            return alertCount.value <= 50 ? alertCount : `${alertCount.value}+`
+        })
+
         return {
             consoleMessages,
             removeMessage,
             clearConsole,
             alertCount,
             isOpen,
-            toggleOpen
+            toggleOpen,
+            alertCountFormatted
         }
     }
 }
