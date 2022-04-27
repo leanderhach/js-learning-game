@@ -184,26 +184,54 @@ export const store = createStore({
         },
 
         workerUnloadStoredResources(state, robot) {
+
+            console.log('unloading resources')
             let requirements = state.levelRequirements;
+
+            console.log(requirements);
 
             for (const [index, resource] of robot.backpack.entries()) {
                 let requirementIndex = requirements.findIndex(requirement => requirement.type === resource.type);
 
 
                 if (requirementIndex !== -1 && requirements[requirementIndex].harvested < requirements[requirementIndex].quota) {
+
+                    console.log('stashing resource...')
                     requirements[requirementIndex].harvested += 1;
                     state.levelRequirements = requirements;
 
                     // remove the element from the robot's backpack if its required;
                     robot.backpack.splice(index, 1);
 
-                    // update the robot
-                    this.commit('updateRobotInstance', robot);
-
                     // check if all requirements have been satisfied
                     this.commit('checkLevelRequirements');
                 }
             }
+
+            // update the robot
+            this.commit('updateRobotInstance', robot);
+        },
+
+        updateResource(state, { resourceID, resource }) {
+            console.log('updating resource....')
+            // updates a resource, usually to revert a collectorAssigned status from bots that have a full backpack
+            let resourceIndex = state.resources.findIndex(resource => resource.id === resourceID);
+            console.log(resourceID)
+            console.log(resourceIndex)
+
+            if (resourceIndex) {
+                state.resources[resourceIndex] = resource;
+            }
+
+            // update the resource list for all bots
+            this.commit('updateResourceList');
+        },
+
+        dumpBackpack(state, robot) {
+            robot.backpack = []
+
+            this.commit('updateRobotInstance', robot);
+
         },
 
         addMessageToConsole(state, {type, level, heading, message}) {
@@ -215,9 +243,6 @@ export const store = createStore({
                     message: message,
                 },
             };
-
-            console.log(newMessage);
-
             state.consoleMessages.push(newMessage);
         },
 

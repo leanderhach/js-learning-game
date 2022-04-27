@@ -79,7 +79,7 @@ export default {
 
         .overlay-content{
             pointer-events: all;
-            margin-top:-100%;
+            margin-top:-1000%;
             background-color:white;
             padding:30px 20px;
             border-radius:15px;

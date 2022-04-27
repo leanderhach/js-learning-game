@@ -42,17 +42,22 @@ export default {
                 case 'collectResource':
                     store.commit('collectResource', e.data.resource);
                     break;
-
+                case 'updateResource':
+                    store.commit('updateResource', { resourceID: e.data.resourceID, resource: e.data.resource});
+                    break;
                 case 'doneWork':
                     store.commit('doneWork', e.data.robot);
                     break;
-                
                 case 'unloadStoredResources':
                     store.commit('workerUnloadStoredResources', e.data.robot);
+                case 'dumpBackpack':
+                    store.commit('dumpBackpack', e.data.robot)
                     break;
                 case 'log':
                     store.commit('addMessageToConsole', { ...e.data });
                     break;
+                case 'debug':
+                    console.log(e.data.message);
             }
         }
 
@@ -200,10 +205,9 @@ export default {
                         backpackSize: 3,
                     }
 
-                    store.commit('setLevelRequirements', { requirements, robotUpgrades})
-
                     makeResource(15, 'iron');
                     makeResource(30, 'cobalt');
+                    store.commit('setLevelRequirements', { requirements, robotUpgrades})
                     break;
 
                 case 'level3':

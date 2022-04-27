@@ -7,13 +7,13 @@
         </div>
         <div class="messages__body">
             <div v-for="(message, key) in consoleMessages" :key="key" :class="['console-message', message.body.level]">
-                <span class="console-message__heading">
+                <div class="console-message__heading">
                     <img class="icon log-icon" src="/icons/circle-info.svg">
+                    <img class="icon warn-icon" src="/icons/triangle-exclamation.svg">
                     <img class="icon danger-icon" src="/icons/triangle-exclamation.svg">
-                    <img class="icon error-icon" src="/icons/circle-exclamation.svg">
-                    {{ message.body.heading }}
-                </span>
-                <span class="console-message__body">{"x": "stuff", "id": "bb589424-5d4c-428e-b701-4d0c09617bad"} </span>
+                    <p>{{ message.body.heading }}</p>
+                </div>
+                <p class="console-message__body">{{message.body.message}}</p>
             </div>
         </div>
     </div>
@@ -60,7 +60,7 @@ export default {
         }
 
         const alertCountFormatted = computed(() => {
-            return alertCount.value <= 50 ? alertCount : `${alertCount.value}+`
+            return alertCount.value <= 50 ? alertCount : `50`
         })
 
         return {
@@ -98,31 +98,60 @@ export default {
         text-align:left;
         display:flex;
         flex-direction: column;
-        padding:0.5rem 0;
+        border-top: 1px solid var(--text-dark);
+        padding:15px;
+
+        &__heading {
+            display:flex;
+            flex-direction: row;
+            margin-bottom:5px;
+        }
+
+        P {
+            margin:0;
+        }
 
         .icon {
             display: none;
         }
 
         &.log {
-            color: #f8c291;
+            color: #686de0;
 
             & .log-icon {
                 display: block;
+                filter: invert(42%) sepia(93%) saturate(434%) hue-rotate(200deg) brightness(91%) contrast(93%);
+                margin-right:5px;
+            }
+        }
+        &.warn {
+            color: #f8c291;
+
+            &.warn-icon {
+                display: block;
                 filter: invert(96%) sepia(90%) saturate(7445%) hue-rotate(300deg) brightness(108%) contrast(95%);
+                margin-right:5px;
+            }
+        }
+        &.danger {
+            color: #eb4d4b;
+
+            & .danger-icon {
+                display: block;
+                filter: invert(40%) sepia(13%) saturate(6194%) hue-rotate(329deg) brightness(99%) contrast(87%);
                 margin-right:5px;
             }
         }
     }
 
     .messages  {
-        &__heading {
+        &__header {
             display:flex;
         }
 
         &__body {
             height:20vh;
-            overflow:scroll;
+            overflow-y:scroll;
         }
     }
 
@@ -149,6 +178,7 @@ export default {
     .icon{
         height:1rem;
         width:1rem;
+        padding:0.1rem;
 
         &__lg {
             height:2rem;

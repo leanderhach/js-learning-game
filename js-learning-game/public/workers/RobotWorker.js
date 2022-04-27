@@ -9,7 +9,14 @@ let resources = null;
 let targetResource = null;
 let collectedResource = null;
 
+// runtime check variables
+let running = false;
+let mapHasResources = true;
+let shouldRunAgain = true;
+let isPlaying = true;
 
+// count the number of instant execution loops
+let instantLoops = 0
 
 //-------------------------------------------------------------------------//
 // Point class
@@ -66,7 +73,7 @@ function distanceBetweenPoints(initialPoint, destinationPoint) {
 // Print to console function
 //------------------------------------------------------------------------//
 function printMessageToConsole(level, heading, message) {
-    postMessage({ type: 'log', level: level, heading: heading, message: JSON.stringify(message) });
+    postMessage({ type: 'log', level: level, heading: heading || `${robot.name}:${robot.id}`, message: JSON.stringify(message) });
 }
 
 //-------------------------------------------------------------------------//
@@ -80,7 +87,7 @@ function RobotWorker(id) {
 RobotWorker.prototype.findResource = function (type) {
     let resourcesOfType = resources.filter(resource => resource.type === type && !resource.hasCollectorAssigned);
 
-    if (resourcesOfType.length > 0 && !(robot.backpack.length === robot.backpackSize)) {
+    if (resourcesOfType.length > 0) {
         rand = Math.floor(Math.random() * resourcesOfType.length);
         targetResource = resourcesOfType[rand];
         
@@ -96,6 +103,8 @@ RobotWorker.prototype.findResource = function (type) {
         postMessage({type: 'resourceListUpdate', resources: resources });
         return targetResource;
     }
+
+    printMessageToConsole('warn', null, 'Can\'t find any new resources!');
     return null;
 }
 
@@ -110,7 +119,7 @@ RobotWorker.prototype.turnOff = function () {
 RobotWorker.prototype.collectResource = function () {
     
 
-    // extrapolate the robot's position. it may be off by += 1
+    // extrapolate the robot's position. it may be off by += 5
     let lowX = robot.position.x - 5;
     let highX = robot.position.x + 5;
 
@@ -130,6 +139,13 @@ RobotWorker.prototype.collectResource = function () {
             postMessage({ type: 'collectResource', resource: targetResource.id });
             postMessage({ type: 'updateRobot', robot: robot, instance: robotWorker.id });
             return true;
+        } else {
+
+            targetResource.hasCollectorAssigned = false;
+            // if backpack is full, release the resource back to not having a collector
+            postMessage({ type: 'updateResource', resourceID: targetResource.id, resource: targetResource });
+            postMessage({ type: 'updateRobot', robot: robot, instance: robotWorker.id });
+            printMessageToConsole('danger', null, 'Backpack full, cannot collect resource.');
         }
     }
 
@@ -205,25 +221,37 @@ RobotWorker.prototype.getColor = function () {
 }
 
 RobotWorker.prototype.sendLogMessage = function (message) {
-    printMessageToConsole('log', `${robot.name}:${robot.id}`, message);
+    printMessageToConsole('log', null, message);
 }
 //-------------------------------------------------------------------------//
 // Main Loop
 //------------------------------------------------------------------------//
 
-let running = false;
-let mapHasResources = true;
-let isPlaying = true;
-
 async function mainLoop() {
 
+    // if (instantLoops >= 10) {
+    //     printMessageToConsole('danger', null, 'infinite loop, stopping bot');
+    // }
+
     // only run the robot's script if robot setup has been completed, and no other game conditions are breached
-    if (robot.name && robot.script && robotWorker && resources && !running && isPlaying && mapHasResources) {
+    if (robot.name && robot.script && robotWorker && resources && !running && shouldRunAgain && isPlaying && mapHasResources && instantLoops <= 10) {
 
         running = true;
+
+        var startTime = performance.now()
         let mainFunc = await new AsyncFunction('robot', 'print', robot.script)(robotWorker, robotWorker.sendLogMessage);
         // report back that the main loop has been cycled. Should return either continueWork or returnHome
         postMessage({ type: 'doneWork', robot: robot });
+
+        var endTime = performance.now()
+
+        if ((endTime - startTime) < 20) {
+            printMessageToConsole('danger', null, `danger: infinite loop detected. Iterations before forced stop: ${10 - instantLoops}`)
+            instantLoops += 1;
+        } else {
+            instantLoops = 0;
+        }
+
         mainFunc = null;
 
         running = false;
@@ -261,7 +289,6 @@ self.onmessage = function (e) {
         // and there still being resources avaliable
         case 'outOfResources':
             resources = JSON.parse(e.data.resources);
-            printMessageToConsole('out of resources acknowleged');
             mapHasResources = false;
             break;
 
