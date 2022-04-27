@@ -43,7 +43,6 @@ export default {
         const missionBrief = computed(() => store.state.missionBrief);
 
         const togglePlaying = () => {
-            console.log('clicked');
             store.commit('togglePlaying');
         }
 

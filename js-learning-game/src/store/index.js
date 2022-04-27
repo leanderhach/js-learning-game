@@ -15,7 +15,15 @@ export const store = createStore({
         levelRequirements: [],
         chapterFile: 'level1',
         resources: [],
+        upgradables: {
+            backpackSize: 1,
+            speed: 160,
+        },
+        consoleMessages: [],
     }
+    },
+    getters: {
+        upgradables: state => state.upgradables,
     },
     mutations: {
         addRobotTemplate(state, template) {
@@ -27,6 +35,11 @@ export const store = createStore({
         },
         togglePlaying(state) {
             state.isPlaying = !state.isPlaying;
+
+            // inform each worker of the change in active play status
+            for (let worker of state.robotWorkers) {
+                worker.workerInstance.pushMessage({type: 'changePlayState', state: state.isPlaying})
+            }
         },
         changeChapterFile(state, name) {
             state.chapterFile = name;
@@ -37,6 +50,9 @@ export const store = createStore({
             } else {
                 state.resources.push(resources);
             }
+
+            // push the new resource list to the workers
+            this.commit('updateResourceList');
         },
         createRobotWorkerAndInstance(state, { instance, template }) {
 
@@ -53,8 +69,6 @@ export const store = createStore({
                 robotInstance: newRobotInstance.id,
                 robotWorker: instance,
             });
-
-            console.log(state.robotInstances, state.robotWorkers);
 
             // once the instance is added, finish setting it up
             instance.postMessage({
@@ -78,10 +92,19 @@ export const store = createStore({
             }
         },
 
+        collectResource(state, resourceID) {
+            let indexOfResource = state.resources.findIndex(resource => resource.id === resourceID);
+
+            state.resources.splice(indexOfResource, 1);
+
+            this.commit('updateResourceList');
+        },
+
         updateResourceList(state, resources) {
-            console.log(state.resources);
-            console.log(resources);
-            state.resources = resources;
+
+            if (resources) {
+                state.resources = resources;
+            }
 
             for (const worker of state.robotWorkers) {
                 worker.robotWorker.postMessage({
@@ -101,11 +124,63 @@ export const store = createStore({
                     robotInstance: JSON.stringify(state.robotInstances[robotInstanceIndex]),
                     resources: JSON.stringify(state.resources),
                 })
+            } else if (state.resources.length <= 0) {
+                state.robotWorkers[robotWorkerIndex].robotWorker.postMessage({
+                    type: 'outOfResources',
+                    resources: JSON.stringify(state.resources),
+                })
             }
         },
 
-        setLevelRequirements(state, requirements) {
+        sendContinueWork(state, robot) {
+            // simple reusable interface to send a continue work order to a given worker
+            const worker = state.robotWorkers.find(worker => worker.robotInstance === robot.id);
+            const robotInstance = state.robotInstances.find(instance => instance.id === robot.id);
+
+            worker.robotWorker.postMessage({
+                type: 'continueWork',
+                robotInstance: JSON.stringify(robotInstance),
+                resources: JSON.stringify(state.resources),
+            });
+        },
+
+        setLevelRequirements(state, { requirements, robotUpgrades}) {
             state.levelRequirements = requirements;
+
+            // check if the level change also upgrades the robots
+            if (robotUpgrades) {
+                Object.keys(robotUpgrades).forEach(key => {
+                    state.upgradables[key] = robotUpgrades[key];
+
+                    for (let robotTemplate of state.robotTemplates) {
+                        robotTemplate[key] = state.upgradables[key];
+                    }
+
+                    for (let robotInstance of state.robotInstances) {
+                        robotInstance[key] = state.upgradables[key];
+
+                        // update the robot workers, which may have stopped
+                        // working if they ran out of resources
+                        this.commit('sendContinueWork', robotInstance);
+                    }
+                })
+            }
+        },
+
+        checkLevelRequirements(state) {
+            let requirements = state.levelRequirements;
+
+            for (let requirement of requirements) {
+                if (requirement.quota === requirement.harvested) {
+                    continue;
+                }
+
+                return;
+            }
+
+            // if all requirements have been satisfied
+            let level = state.chapterFile.match(/[0-9]/);
+            this.commit('changeChapterFile', `level${(parseInt(level[0]) + 1)}`);
         },
 
         workerUnloadStoredResources(state, robot) {
@@ -124,8 +199,35 @@ export const store = createStore({
 
                     // update the robot
                     this.commit('updateRobotInstance', robot);
+
+                    // check if all requirements have been satisfied
+                    this.commit('checkLevelRequirements');
                 }
             }
+        },
+
+        addMessageToConsole(state, {type, level, heading, message}) {
+            let newMessage = {
+                id: uuidv4(),
+                body: {
+                    level: level,
+                    heading: heading,
+                    message: message,
+                },
+            };
+
+            console.log(newMessage);
+
+            state.consoleMessages.push(newMessage);
+        },
+
+        removeMessageFromConsole(state, messageID) {
+            let messageIndex = state.consoleMessages.findIndex(message => message.id === messageID);
+            state.consoleMessages.splice(messageIndex, 1);
+        },
+
+        clearMessageConsole(state) {
+            state.consoleMessages = [];
         }
     }
 })

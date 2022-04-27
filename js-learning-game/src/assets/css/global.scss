@@ -1,5 +1,48 @@
+@font-face {
+    font-family: 'Rokkitt';
+    src: url('../fonts/Rokkitt-Regular.ttf');
+    font-weight:400;
+    font-style: normal;
+}
+
+@font-face {
+    font-family: 'Rokkitt';
+    src: url('../fonts/Rokkitt-Bold.ttf');
+    font-weight:700;
+    font-style: normal;
+}
+
+@font-face {
+    font-family: 'Rokkitt';
+    src: url('../fonts/Rokkitt-SemiBold.ttf');
+    font-weight:600;
+    font-style: normal;
+}
+
+@font-face {
+    font-family: 'RadioCanada';
+    src: url('../fonts/RadioCanada-Regular.ttf');
+    font-weight:400;
+    font-style: normal;
+}
+
+@font-face {
+    font-family: 'RadioCanada';
+    src: url('../fonts/RadioCanada-Bold.ttf');
+    font-weight:700;
+    font-style: normal;
+}
+
+@font-face {
+    font-family: 'RadioCanada';
+    src: url('../fonts/RadioCanada-SemiBold.ttf');
+    font-weight:600;
+    font-style: normal;
+}
+
+
 :root {
-    --space: #222f3e;
+    --space: #10171f;
     --text-light: #c8d6e5;
     --text-dark: #222f3e;
     --orange: #ff9f43;
@@ -27,22 +70,18 @@ body, html, #app, #app-container{
 }
 
 .clickable-card {
-    width: 80%;
     border: 6px solid var(--green);
     border-radius: 15px;
     margin: 10px;
-    padding: 20px 10px;
+    padding: 10px;
     cursor:pointer;
     box-sizing: border-box;
-
-    &:hover{
-
-    }
+    position:relative;
 }
 
 .content-box {
     background-color: white;
-    box-shadow: 10px 10px 5px 0px rgba(16,23,31,0.74);
+    box-shadow: 10px 10px 5px 0px rgba(8,11,15,0.74);
     color: var(--text-dark);
     padding:20px 0;
     pointer-events: all; 
@@ -60,6 +99,7 @@ body, html, #app, #app-container{
     border:none;
     color:white;
     font-weight:bold;
+    margin:5px 0;
 
     &:hover{
         background-color:var(--blue);

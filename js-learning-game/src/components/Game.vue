@@ -39,8 +39,11 @@ export default {
                 case 'resourceListUpdate':
                     store.commit('updateResourceList', e.data.resources);
                     break;
+                case 'collectResource':
+                    store.commit('collectResource', e.data.resource);
+                    break;
+
                 case 'doneWork':
-                    console.log('called done');
                     store.commit('doneWork', e.data.robot);
                     break;
                 
@@ -48,7 +51,8 @@ export default {
                     store.commit('workerUnloadStoredResources', e.data.robot);
                     break;
                 case 'log':
-                    console.log(e.data.message);
+                    store.commit('addMessageToConsole', { ...e.data });
+                    break;
             }
         }
 
@@ -106,12 +110,12 @@ export default {
                 switch (resource.type) {
                     case 'Iron':
                         image = await getSprite('resources', 'iron.png');
-                        gameContext.drawImage(image, resource.position.x, resource.position.y, 20, 20);
+                        gameContext.drawImage(image, resource.position.x, resource.position.y, 10, 10);
                         break;
                     
                     case 'Cobalt':
                         image = await getSprite('resources', 'cobalt.png');
-                        gameContext.drawImage(image, resource.position.x, resource.position.y, 20, 20);
+                        gameContext.drawImage(image, resource.position.x, resource.position.y, 10, 10);
                         break;
                 }
             }
@@ -120,7 +124,31 @@ export default {
         const drawBots = async () => {
             for (let robot of store.state.robotInstances) {
                 let image = await getSprite('robots', 'basic_robot.png');
+
+                // set the robot's color
+                // lord forgive me for this switch statement
+                switch (robot.color) {
+                    case '--robot-gold':
+                        gameContext.filter = 'invert(81%) sepia(52%) saturate(447%) hue-rotate(351deg) brightness(98%) contrast(88%)';
+                        break;
+                    case '--robot-blue':
+                        gameContext.filter = 'invert(23%) sepia(69%) saturate(7426%) hue-rotate(240deg) brightness(100%) contrast(96%)';
+                        break;
+                    case '--robot-green':
+                        gameContext.filter = 'invert(70%) sepia(56%) saturate(543%) hue-rotate(88deg) brightness(87%) contrast(98%)';
+                        break;
+                    case '--robot-orange':
+                        gameContext.filter = 'invert(61%) sepia(86%) saturate(3582%) hue-rotate(330deg) brightness(99%) contrast(104%)';
+                        break;
+                    case '--robot-grey':
+                        gameContext.filter = 'invert(50%) sepia(20%) saturate(280%) hue-rotate(179deg) brightness(92%) contrast(86%)';
+                        break;
+                    case '--robot-lime':
+                        gameContext.filter = 'invert(80%) sepia(67%) saturate(335%) hue-rotate(73deg) brightness(101%) contrast(86%)';
+                        break;
+                }
                 gameContext.drawImage(image, robot.position.x, robot.position.y, 15, 15);
+                gameContext.filter = "none";
             }
         }
 
@@ -131,10 +159,12 @@ export default {
 
         const changeLevel = () => {
             let requirements;
+            let robotUpgrades;
+
             switch (currentLevel.value) {
                 case 'level1':
                     console.log('level 1!');
-                    makeResource(10, 'iron');
+                    makeResource(16, 'iron');
 
                     // set the resource requirements for this level
                     requirements = [
@@ -145,22 +175,41 @@ export default {
                         }
                     ];
 
-                    store.commit('setLevelRequirements', requirements);
+                    store.commit('setLevelRequirements', { requirements });
 
                     break;
                 
                 case 'level2':
 
-                    console.log('spawning cobalt...');
-                    const resourcesLeft = resources;
-                    let ironLeft = resources.filter(resource => resource.type === 'Iron').length;
+                    console.log('level 2!');
 
-                    if(ironLeft < 3) {
-                        makeResource(15, 'iron');
+                    requirements = [
+                        {
+                            type: 'Iron',
+                            quota: 20,
+                            harvested: 0
+                        },
+                        {
+                            type: 'Cobalt',
+                            quota: 16,
+                            harvested: 0,
+                        }
+                    ]
+
+                    robotUpgrades = {
+                        backpackSize: 3,
                     }
 
+                    store.commit('setLevelRequirements', { requirements, robotUpgrades})
+
+                    makeResource(15, 'iron');
                     makeResource(30, 'cobalt');
                     break;
+
+                case 'level3':
+                    console.log('level 3!');
+
+
             }
 
             oldLevel.value = currentLevel.value;

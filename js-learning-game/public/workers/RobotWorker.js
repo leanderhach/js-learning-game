@@ -65,8 +65,8 @@ function distanceBetweenPoints(initialPoint, destinationPoint) {
 //-------------------------------------------------------------------------//
 // Print to console function
 //------------------------------------------------------------------------//
-function printMessageToConsole(message) {
-    postMessage({ type: 'log', message: JSON.stringify(message) });
+function printMessageToConsole(level, heading, message) {
+    postMessage({ type: 'log', level: level, heading: heading, message: JSON.stringify(message) });
 }
 
 //-------------------------------------------------------------------------//
@@ -80,7 +80,7 @@ function RobotWorker(id) {
 RobotWorker.prototype.findResource = function (type) {
     let resourcesOfType = resources.filter(resource => resource.type === type && !resource.hasCollectorAssigned);
 
-    if (resourcesOfType.length > 0) {
+    if (resourcesOfType.length > 0 && !(robot.backpack.length === robot.backpackSize)) {
         rand = Math.floor(Math.random() * resourcesOfType.length);
         targetResource = resourcesOfType[rand];
         
@@ -111,11 +111,11 @@ RobotWorker.prototype.collectResource = function () {
     
 
     // extrapolate the robot's position. it may be off by += 1
-    let lowX = robot.position.x - 1;
-    let highX = robot.position.x + 1;
+    let lowX = robot.position.x - 5;
+    let highX = robot.position.x + 5;
 
-    let lowY = robot.position.y - 1;
-    let highY = robot.position.y + 1;
+    let lowY = robot.position.y - 5;
+    let highY = robot.position.y + 5;
     
     if (targetResource.position.x >= lowX
         && targetResource.position.x <= highX
@@ -126,11 +126,8 @@ RobotWorker.prototype.collectResource = function () {
 
         if (robot.backpack.length <= robot.backpackSize) {
             robot.backpack.push(collectedResource);
-            let pos = resources.map(function (e) { return e.id; }).indexOf(targetResource.id);
 
-            resources.splice(pos, 1);
-
-            postMessage({ type: 'resourceListUpdate', resources: resources });
+            postMessage({ type: 'collectResource', resource: targetResource.id });
             postMessage({ type: 'updateRobot', robot: robot, instance: robotWorker.id });
             return true;
         }
@@ -146,9 +143,8 @@ RobotWorker.prototype.navigateToLocation = async function (location, startPoint,
         return true;
     }
 
-    // console.log('running navigation');
     // robots can move at a set speed
-    const speed = 80;
+    const speed = 160;
     const initialPosition = startPoint || robot.position; 
     let timeStep = 1 + (passedTime || 0); //Loop counter
 
@@ -207,20 +203,25 @@ RobotWorker.prototype.toggleDebug = function () {
 RobotWorker.prototype.getColor = function () {
     return robot.color;
 }
+
+RobotWorker.prototype.sendLogMessage = function (message) {
+    printMessageToConsole('log', `${robot.name}:${robot.id}`, message);
+}
 //-------------------------------------------------------------------------//
 // Main Loop
 //------------------------------------------------------------------------//
 
 let running = false;
-let shouldContinueRun = true;
+let mapHasResources = true;
+let isPlaying = true;
 
 async function mainLoop() {
 
-    // only run the robot's script if robot setup has been completed
-    if (robot.name && robot.script && robotWorker && resources && running === false) {
+    // only run the robot's script if robot setup has been completed, and no other game conditions are breached
+    if (robot.name && robot.script && robotWorker && resources && !running && isPlaying && mapHasResources) {
 
         running = true;
-        let mainFunc = await new AsyncFunction('robot', 'print', robot.script)(robotWorker, printMessageToConsole);
+        let mainFunc = await new AsyncFunction('robot', 'print', robot.script)(robotWorker, robotWorker.sendLogMessage);
         // report back that the main loop has been cycled. Should return either continueWork or returnHome
         postMessage({ type: 'doneWork', robot: robot });
         mainFunc = null;
@@ -260,13 +261,19 @@ self.onmessage = function (e) {
         // and there still being resources avaliable
         case 'outOfResources':
             resources = JSON.parse(e.data.resources);
-            shouldContinueRun = false;
+            printMessageToConsole('out of resources acknowleged');
+            mapHasResources = false;
             break;
 
         // case for the resource list being updated
         case 'updateResourceList':
             resources = JSON.parse(e.data.resources);
-            shouldContinueRun = true;
+
+            // if there are resources in the map, set var to true
+            if (resources.length > 0) {
+                mapHasResources = true;
+            }
+
             break;
 
         // case for ordering the robot home
@@ -276,7 +283,7 @@ self.onmessage = function (e) {
 
         // default return to 'doneWork' message sent from worker
         case 'continueWork':
-            if (shouldContinueRun) {
+            if (mapHasResources) {
                 robot = JSON.parse(e.data.robotInstance);
                 robot.script = `${JSON.parse(robot.script)}`;
                 resources = JSON.parse(e.data.resources);
@@ -288,6 +295,10 @@ self.onmessage = function (e) {
         case 'updateRobot':
             robot = JSON.parse(e.data.robotInstance);
             break;
+        
+        // case for playstate being changed
+        case 'changePlayState':
+            isPlaying = e.data.state;
 
     }
 }

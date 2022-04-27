@@ -3,7 +3,7 @@ import Point from '../maths/Point';
 import { lerp, distanceBetweenPoints } from '../maths';
 import Vector from '../maths/Vector';
 import timeout from '../../../utils/timeout';
-import { useStore } from 'vuex'
+import { store } from '../../../store';
 
 function Robot(name, color, script, posX, posY) {
     this.name = name;
@@ -18,12 +18,13 @@ function Robot(name, color, script, posX, posY) {
     this.on = false;
 
     this.backpack = [];
-    this.backpackSize = 1;
+
+    this.backpackSize = store.getters.upgradables.backpackSize;
 }
 
 
 Robot.prototype.toString = function () {
-    return `name: ${this.name}, color: ${this.color}`
+    return `name: ${this.name}, color: ${this.color}`;
 }
 
 export default Robot;

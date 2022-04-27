@@ -8,6 +8,7 @@
       <div class="column" />
       <div class="column">
         <ProgressMenu />
+        <ConsoleMenu />
       </div>
     </div>
   </main>
@@ -17,6 +18,7 @@
 import RobotMakerMenu from './gameInterface/robotMakerMenu.vue';
 import ProgressMenu from './gameInterface/progressMenu.vue';
 import MainMenu from './gameInterface/mainMenu.vue';
+import ConsoleMenu from './gameInterface/consoleMenu.vue';
 
 export default {
     name: 'UI',
@@ -24,6 +26,7 @@ export default {
         RobotMakerMenu,
         ProgressMenu,
         MainMenu,
+        ConsoleMenu,
     }
 }
 </script>
