@@ -109,6 +109,8 @@ export default {
 
         P {
             margin:0;
+            white-space: normal;
+            overflow-wrap: break-word;
         }
 
         .icon {

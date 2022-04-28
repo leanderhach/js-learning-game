@@ -14,8 +14,8 @@ You'll notice that we have some code already written in the editor. You control 
 #### Function Bank
 
 - `turnOn()`: turns on a drone
-- `findResource()`: locates a resource of the given type
-- `navigateTo()`: moves the drone from its current position to the new resource. IMPORTANT: takes time.
+- `findResource()`: returns resource and position
+- `async navigateToLocation()`: moves drone to new location
 - `collectResource()`: collects the resource that the drone is seeking
-- `returnHome()`: instructs the drone to return back to the mothership. IMPORTANT: takes time.
-- `storeResource()`: stores the resource on the mothership
+- `async returnHome()`: returns drone to home point
+- `async unloadBackpack()`: stores the resource on the mothership

@@ -1,5 +1,5 @@
 robot.turnOn();
-let resource = robot.findResource('Iron');
+let resource = robot.findResource('iron');
             
 await robot.navigateToLocation(resource.position);
 

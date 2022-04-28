@@ -1,7 +1,7 @@
 import Resource from './Resource';
 
 function Cobalt(posX, posY) {
-    Resource.call(this, 'Cobalt', 200, posX, posY, 'blue', 'square');
+    Resource.call(this, 'cobalt', 200, posX, posY, 'blue', 'square');
 }
 
 Cobalt.prototype = Object.create(Resource.prototype);

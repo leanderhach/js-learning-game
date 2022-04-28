@@ -2,8 +2,8 @@
   <div id="game-container">
     <canvas
       ref="gameCanvas"
-      height="1080"
-      width="1920"
+      :height="screenHeight"
+      :width="screenWidth"
     />
   </div>
 </template>
@@ -29,6 +29,12 @@ export default {
 
         let currentLevel = computed(() => store.state.chapterFile);
         let oldLevel = ref(null);
+
+        const screenHeight = computed(() => window.innerHeight);
+        const screenWidth = computed(() => window.innerWidth);
+
+        // check the size of the screen
+
 
         const handleRobotInstanceMessages = async (e) => {
 
@@ -82,7 +88,7 @@ export default {
         const drawMothership = () => {
             // draw the mothership. This will remain the same the entire game.
             gameContext.fillStyle = 'red';
-            gameContext.fillRect(1920/2, 1080/2, 50, 50);
+            gameContext.fillRect(screenWidth.value / 2, screenHeight.value / 2, 30, 30);
         }
 
         // resource creation functions
@@ -113,12 +119,12 @@ export default {
                 let image;
 
                 switch (resource.type) {
-                    case 'Iron':
+                    case 'iron':
                         image = await getSprite('resources', 'iron.png');
                         gameContext.drawImage(image, resource.position.x, resource.position.y, 10, 10);
                         break;
                     
-                    case 'Cobalt':
+                    case 'cobalt':
                         image = await getSprite('resources', 'cobalt.png');
                         gameContext.drawImage(image, resource.position.x, resource.position.y, 10, 10);
                         break;
@@ -174,7 +180,7 @@ export default {
                     // set the resource requirements for this level
                     requirements = [
                         {
-                            type: 'Iron',
+                            type: 'iron',
                             quota: 10,
                             harvested: 0,
                         }
@@ -190,12 +196,12 @@ export default {
 
                     requirements = [
                         {
-                            type: 'Iron',
+                            type: 'iron',
                             quota: 20,
                             harvested: 0
                         },
                         {
-                            type: 'Cobalt',
+                            type: 'cobalt',
                             quota: 16,
                             harvested: 0,
                         }
@@ -205,7 +211,7 @@ export default {
                         backpackSize: 3,
                     }
 
-                    makeResource(15, 'iron');
+                    makeResource(25, 'iron');
                     makeResource(30, 'cobalt');
                     store.commit('setLevelRequirements', { requirements, robotUpgrades})
                     break;
@@ -213,7 +219,27 @@ export default {
                 case 'level3':
                     console.log('level 3!');
 
+                    requirements = [
+                        {
+                            type: 'iron',
+                            quota: 20,
+                            harvested: 0
+                        },
+                        {
+                            type: 'cobalt',
+                            quota: 16,
+                            harvested: 0,
+                        }
+                    ]
 
+                    robotUpgrades = {
+                        backpackSize: 3,
+                    }
+
+                    makeResource(25, 'iron');
+                    makeResource(30, 'cobalt');
+                    store.commit('setLevelRequirements', { requirements, robotUpgrades})
+                    break;
             }
 
             oldLevel.value = currentLevel.value;
@@ -243,7 +269,9 @@ export default {
 
         return {
             gameCanvas,
-            gameContext
+            gameContext,
+            screenHeight,
+            screenWidth
         }
     }
 }

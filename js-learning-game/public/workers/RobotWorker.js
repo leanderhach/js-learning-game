@@ -134,6 +134,7 @@ RobotWorker.prototype.collectResource = function () {
         collectedResource = JSON.parse(JSON.stringify(targetResource));
 
         if (robot.backpack.length <= robot.backpackSize) {
+            postMessage({type: 'debug', message: 'added to pack'})
             robot.backpack.push(collectedResource);
 
             postMessage({ type: 'collectResource', resource: targetResource.id });
@@ -192,8 +193,9 @@ RobotWorker.prototype.returnHome = async function () {
     return await this.navigateToLocation(new Point(960, 540));
 }
 
-RobotWorker.prototype.unloadResources = function () {
+RobotWorker.prototype.unloadResources = async function () {
     postMessage({ type: 'unloadStoredResources', robot: robot });
+    await timeout(200);
 }
 
 RobotWorker.prototype.checkBackpack = function() {
@@ -220,6 +222,10 @@ RobotWorker.prototype.getColor = function () {
     return robot.color;
 }
 
+RobotWorker.prototype.dumpBackpack = function () {
+    postMessage({ type: 'dumpBackpack', robot: robot });
+}
+
 RobotWorker.prototype.sendLogMessage = function (message) {
     printMessageToConsole('log', null, message);
 }
@@ -237,7 +243,7 @@ async function mainLoop() {
     if (robot.name && robot.script && robotWorker && resources && !running && shouldRunAgain && isPlaying && mapHasResources && instantLoops <= 10) {
 
         running = true;
-
+                    postMessage({type: 'debug', message: 'main loop running'})
         var startTime = performance.now()
         let mainFunc = await new AsyncFunction('robot', 'print', robot.script)(robotWorker, robotWorker.sendLogMessage);
         // report back that the main loop has been cycled. Should return either continueWork or returnHome
@@ -321,6 +327,7 @@ self.onmessage = function (e) {
         // case for the robot being updated on the frontend
         case 'updateRobot':
             robot = JSON.parse(e.data.robotInstance);
+            robot.script = `${JSON.parse(robot.script)}`;
             break;
         
         // case for playstate being changed

@@ -78,6 +78,35 @@ export const store = createStore({
             });
         },
 
+        updateRobotTemplateScript(state, robot) {
+            // updates the script of a robot
+
+            console.log('updating template')
+            let robotTemplate = state.robotTemplates.find(template => template.templateID === robot.templateID);
+
+            if (robotTemplate) {
+
+                console.log('found robot');
+                robotTemplate.script = robot.script;
+
+                // update every robot instance with the new robot script,
+                // and update every worker
+                state.robotInstances.filter(instance => instance.templateID === robotTemplate.templateID).forEach(instance => {
+
+                    console.log(instance);
+                    instance.script = robotTemplate.script;
+
+                    let worker = state.robotWorkers.find(worker => worker.robotInstance === instance.id);
+
+                    if (worker) {
+                        console.log('updating worker...')
+                        this.commit('updateRobotInstance', instance);
+                        this.commit('sendContinueWork', instance);
+                    }
+                });
+            }
+        },
+
         updateRobotInstance(state, robot) {
             let robotInstance = state.robotInstances.findIndex(instance => instance.id === robot.id);
 
@@ -161,6 +190,7 @@ export const store = createStore({
 
                         // update the robot workers, which may have stopped
                         // working if they ran out of resources
+                        this.commit('updateResourceList');
                         this.commit('sendContinueWork', robotInstance);
                     }
                 })
@@ -185,23 +215,25 @@ export const store = createStore({
 
         workerUnloadStoredResources(state, robot) {
 
-            console.log('unloading resources')
+            console.log('unload command recieved')
+            console.log(robot.backpack);
+
             let requirements = state.levelRequirements;
 
-            console.log(requirements);
+            for (var i = robot.backpack.length - 1; i >= 0; i--) {
 
-            for (const [index, resource] of robot.backpack.entries()) {
+                console.log(`unloading ${i}`)
+                let resource = robot.backpack[i];
                 let requirementIndex = requirements.findIndex(requirement => requirement.type === resource.type);
 
 
                 if (requirementIndex !== -1 && requirements[requirementIndex].harvested < requirements[requirementIndex].quota) {
 
-                    console.log('stashing resource...')
                     requirements[requirementIndex].harvested += 1;
                     state.levelRequirements = requirements;
 
                     // remove the element from the robot's backpack if its required;
-                    robot.backpack.splice(index, 1);
+                    robot.backpack.splice(i, 1);
 
                     // check if all requirements have been satisfied
                     this.commit('checkLevelRequirements');
@@ -209,15 +241,13 @@ export const store = createStore({
             }
 
             // update the robot
+            console.log(robot.backpack)
             this.commit('updateRobotInstance', robot);
         },
 
         updateResource(state, { resourceID, resource }) {
-            console.log('updating resource....')
             // updates a resource, usually to revert a collectorAssigned status from bots that have a full backpack
             let resourceIndex = state.resources.findIndex(resource => resource.id === resourceID);
-            console.log(resourceID)
-            console.log(resourceIndex)
 
             if (resourceIndex) {
                 state.resources[resourceIndex] = resource;

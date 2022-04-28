@@ -1,7 +1,7 @@
 import Resource from './Resource';
 
 function Iron(posX, posY) {
-    Resource.call(this, 'Iron', 200, posX, posY, 'orange', 'triangle');
+    Resource.call(this, 'iron', 200, posX, posY, 'orange', 'triangle');
 }
 
 Iron.prototype = Object.create(Resource.prototype);

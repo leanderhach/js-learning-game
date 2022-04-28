@@ -49,7 +49,7 @@ export default {
         return {
             togglePlaying,
             isPlaying,
-            missionBrief
+            missionBrief,
         }
     }
 }

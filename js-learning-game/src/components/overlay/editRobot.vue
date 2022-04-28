@@ -13,12 +13,7 @@
       />
     </div>
     <div class="button-row">
-      <button
-        class="button"
-        @click="saveRobot"
-      >
-        Save
-      </button>
+      <stateButton :text="'Save'" @clicked="saveRobot"/>
     </div>
   </div>
 </template>
@@ -28,11 +23,18 @@ import * as monaco from 'monaco-editor';
 import { useStore } from 'vuex';
 import { computed, onMounted, ref } from '@vue/runtime-core';
 import { marked } from 'marked';
+import stateButton from '../uiElements/stateButton.vue';
 
 export default {
     name: 'EditRobot',
+    components: {
+      stateButton
+    },
     props: {
-        id: String,
+        id: {
+          type: String,
+          default: '',
+        }
     },
     setup(props) {
         const store = useStore();
@@ -49,12 +51,12 @@ export default {
         }
 
         const saveRobot = () => {
+          console.log('saved!');
             let robot = robotTemplates.value.find(robot => robot.id === props.id);
-            let position = robotTemplates.value.findIndex(robot => robot.id === props.id);
 
             if (robot) {
                 robot.script = JSON.stringify(editor.getValue());
-                robotTemplates.value.splice(position, 1, robot);
+                store.commit('updateRobotTemplateScript', robot)
             }
         }
 
