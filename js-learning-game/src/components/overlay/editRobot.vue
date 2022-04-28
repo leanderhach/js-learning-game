@@ -24,6 +24,7 @@ import { useStore } from 'vuex';
 import { computed, onMounted, ref } from '@vue/runtime-core';
 import { marked } from 'marked';
 import stateButton from '../uiElements/stateButton.vue';
+import emitter from 'tiny-emitter/instance';
 
 export default {
     name: 'EditRobot',
@@ -31,18 +32,20 @@ export default {
       stateButton
     },
     props: {
-        id: {
-          type: String,
-          default: '',
-        }
+      id: {
+        type: String,
+        default: '',
+      }
     },
     setup(props) {
         const store = useStore();
         const chapter = computed(() => store.state.chapterFile);
         const robotTemplates = computed(() => store.state.robotTemplates);
-
         let chapterText = ref('');
-        let editor = ref(null);
+
+        let editor = null;
+        let robotID = ref(props.id);
+
 
         const chapterContent = async () => {
             const file = await fetch(`/levels/${chapter.value}.md`)
@@ -51,35 +54,41 @@ export default {
         }
 
         const saveRobot = () => {
-          console.log('saved!');
-            let robot = robotTemplates.value.find(robot => robot.id === props.id);
+            let robot = robotTemplates.value.find(robot => robot.templateID === robotID.value);
 
             if (robot) {
-                robot.script = JSON.stringify(editor.getValue());
+                robot.script = editor.getValue();
                 store.commit('updateRobotTemplateScript', robot)
             }
         }
+
+        emitter.on('editRobot', (templateID) => {
+          robotID.value = templateID;
+
+          let template = robotTemplates.value.find(robot => robot.templateID === templateID);
+          editor.setValue(template.script);
+        })
 
 
         onMounted(() => {
             chapterContent();
             const store = useStore();
 
+            console.log('stuff');
+
             const container = document.querySelector('#monaco');
             const parentContainer = document.querySelector('#monaco-container');
-            
-            const codePreset = `robot.turnOn();\nlet resourcePosition = robot.findResource(/*TODO: specify resource*/);
-            \nawait robot.navigateTo(/*TODO: where? */);\nrobot.collectResource();\nrobot.returnHome();`
 
             // setup monaco
             editor = monaco.editor.create(container, {
-                value: store.state.robotTemplates.find(robot => robot.id === props.id).script || codePreset,
+                value: 'robot.turnOn()',
                 language: 'javascript',
                 automaticLayout: true,
                 minimap: { enabled: false },
                 scrollBeyondLastLine: false,
                 theme: 'vs-dark',
-                padding: { top: 25 }
+                padding: { top: 25 },
+                readOnly: false,
             })
         })
 
@@ -88,7 +97,7 @@ export default {
             chapterText,
             chapterContent,
             store,
-            editor
+            editor,
         }
     },
 }
@@ -103,7 +112,7 @@ export default {
         height:65%;
 
         .editor{
-            height:100%;
+            height:95%;
             width: calc(50% - 10px);
             margin-right:10px;
         }
@@ -116,14 +125,15 @@ export default {
         }
 
         .instructions {
-            height:100%;
             width: calc(50% - 10px);
             text-align:left;
             margin-left:10px;
         }
 
         .button-row{
-            width:100%;
+          display: flex;
+          flex-direction: row-reverse;
+          width:100%;
         }
     }
 </style>

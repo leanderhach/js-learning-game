@@ -10,8 +10,8 @@
     />
     <EditRobot
       v-if="activeView === 'editRobot'"
-      :id="editRobotID"
       class="overlay-content"
+      :id="activeID"
     />
   </div>
 </template>
@@ -31,25 +31,28 @@ export default {
     setup(props) {
         let isActive = ref(false);
         let activeView = ref('createRobot');
-        let editRobotID = ref(0);
+
+        let activeID = ref(null);
 
         const toggleOverlay = () => {
+            console.log('toggling');
             isActive.value = !isActive.value
         }
 
         emitter.on('editRobot', (id) => {
             activeView.value = 'editRobot';
-            editRobotID.value = id;
-            isActive.value = true;
+            activeID.value = id;
+            toggleOverlay();
+
         })
 
         emitter.on('makeRobotTemplate', () => {
             activeView.value = 'createRobot',
-            isActive.value = true;
+            toggleOverlay();
         })
 
         emitter.on('closeOverlay', () => {
-            isActive.value = false;
+            toggleOverlay();
         })
 
 
@@ -57,7 +60,7 @@ export default {
             toggleOverlay,
             isActive,
             activeView,
-            editRobotID,
+            activeID,
         }
     }
 }
@@ -83,6 +86,7 @@ export default {
             background-color:white;
             padding:30px 20px;
             border-radius:15px;
+            box-sizing: border-box;
         }
 
         &.is-active {

@@ -9,15 +9,13 @@
 </template>
 
 <script>
-import { computed, onMounted, onUpdated, ref } from 'vue';
+import { computed, onMounted, ref } from 'vue';
 import { useStore } from 'vuex';
 import { getRandomInt } from '../utils/math';
 import { getSprite } from '../utils/file';
-import timeout from '../utils/timeout';
 import Iron from '../assets/js/resources/Iron';
 import Cobalt from '../assets/js/resources/Cobalt';
-import Robot from '../assets/js/robots/Robot';
-import emitter from 'tiny-emitter/instance'
+import getColorFilter from '../utils/getColorFilter';
 
 export default {
     name: 'Game',
@@ -30,60 +28,10 @@ export default {
         let currentLevel = computed(() => store.state.chapterFile);
         let oldLevel = ref(null);
 
+
+        // check size of the screen;
         const screenHeight = computed(() => window.innerHeight);
         const screenWidth = computed(() => window.innerWidth);
-
-        // check the size of the screen
-
-
-        const handleRobotInstanceMessages = async (e) => {
-
-            switch(e.data.type) {
-                case 'updateRobot':
-                    store.commit('updateRobotInstance', e.data.robot);
-                    break;
-                case 'resourceListUpdate':
-                    store.commit('updateResourceList', e.data.resources);
-                    break;
-                case 'collectResource':
-                    store.commit('collectResource', e.data.resource);
-                    break;
-                case 'updateResource':
-                    store.commit('updateResource', { resourceID: e.data.resourceID, resource: e.data.resource});
-                    break;
-                case 'doneWork':
-                    store.commit('doneWork', e.data.robot);
-                    break;
-                case 'unloadStoredResources':
-                    store.commit('workerUnloadStoredResources', e.data.robot);
-                case 'dumpBackpack':
-                    store.commit('dumpBackpack', e.data.robot)
-                    break;
-                case 'log':
-                    store.commit('addMessageToConsole', { ...e.data });
-                    break;
-                case 'debug':
-                    console.log(e.data.message);
-            }
-        }
-
-
-        // robot creation events
-        emitter.on('constructRobot', (id) => {
-            let robot = store.state.robotTemplates.find(robot => robot.id === id);
-
-            if (robot) {
-                let robotInstance = new Worker('/workers/RobotWorker.js');
-
-                // add an event listener to the new worker
-                robotInstance.onmessage = (e) => {
-                    handleRobotInstanceMessages(e)
-                };
-
-                store.commit('createRobotWorkerAndInstance', {instance: robotInstance, template: robot});
-            }
-        })
-        
 
         const drawMothership = () => {
             // draw the mothership. This will remain the same the entire game.
@@ -137,27 +85,7 @@ export default {
                 let image = await getSprite('robots', 'basic_robot.png');
 
                 // set the robot's color
-                // lord forgive me for this switch statement
-                switch (robot.color) {
-                    case '--robot-gold':
-                        gameContext.filter = 'invert(81%) sepia(52%) saturate(447%) hue-rotate(351deg) brightness(98%) contrast(88%)';
-                        break;
-                    case '--robot-blue':
-                        gameContext.filter = 'invert(23%) sepia(69%) saturate(7426%) hue-rotate(240deg) brightness(100%) contrast(96%)';
-                        break;
-                    case '--robot-green':
-                        gameContext.filter = 'invert(70%) sepia(56%) saturate(543%) hue-rotate(88deg) brightness(87%) contrast(98%)';
-                        break;
-                    case '--robot-orange':
-                        gameContext.filter = 'invert(61%) sepia(86%) saturate(3582%) hue-rotate(330deg) brightness(99%) contrast(104%)';
-                        break;
-                    case '--robot-grey':
-                        gameContext.filter = 'invert(50%) sepia(20%) saturate(280%) hue-rotate(179deg) brightness(92%) contrast(86%)';
-                        break;
-                    case '--robot-lime':
-                        gameContext.filter = 'invert(80%) sepia(67%) saturate(335%) hue-rotate(73deg) brightness(101%) contrast(86%)';
-                        break;
-                }
+                gameContext.filter = getColorFilter(robot.color);
                 gameContext.drawImage(image, robot.position.x, robot.position.y, 15, 15);
                 gameContext.filter = "none";
             }
@@ -182,7 +110,7 @@ export default {
                         {
                             type: 'iron',
                             quota: 10,
-                            harvested: 0,
+                            harvested: 3,
                         }
                     ];
 
@@ -212,7 +140,7 @@ export default {
                     }
 
                     makeResource(25, 'iron');
-                    makeResource(30, 'cobalt');
+                    makeResource(5, 'cobalt');
                     store.commit('setLevelRequirements', { requirements, robotUpgrades})
                     break;
 
@@ -237,7 +165,7 @@ export default {
                     }
 
                     makeResource(25, 'iron');
-                    makeResource(30, 'cobalt');
+                    makeResource(5, 'cobalt');
                     store.commit('setLevelRequirements', { requirements, robotUpgrades})
                     break;
             }

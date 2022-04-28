@@ -49,13 +49,14 @@ export default {
             position:absolute;
             top:0;
             left:0;
-            width:calc(100% - 10px);
+            width:100%;
             height:calc(100% - 10px);
             pointer-events: none;
             display:flex;
             justify-content: center;
             align-items: center;
-            margin:5px;
+            margin:5px 0;
+            border-radius:10px;
             background-color:var(--green);
 
             img {

@@ -11,8 +11,8 @@
           {{ template.name }}
         </h4>
         <img :class="[template.color, 'robot__image', 'icon', 'icon__lg']" src="/icons/robot.svg" alt="">
-        <button class="button" @click="constructRobot(template.id)">Make Bot</button>
-        <button class="button" @click="editRobot(template.id)">Edit Bot</button>
+        <button class="button" @click="constructRobot(template.templateID)">Make Bot</button>
+        <button class="button" @click="editRobot(template.templateID)">Edit Bot</button>
       </div>
     </div>
     <div class="rmm__add content-box content-box__flexible">
@@ -42,6 +42,7 @@ export default {
         let isOpen = ref(false);
 
         const editRobot = (id) => {
+          console.log(id);
             emitter.emit('editRobot', id);
         }
 
@@ -50,7 +51,7 @@ export default {
         }
 
         const constructRobot = (id) => {
-          emitter.emit('constructRobot', id);
+          store.commit('constructRobot', {id: id, window: window});
         }
 
         const toggleViewRobots = ()=> {
@@ -81,7 +82,7 @@ export default {
         &__robots {
             width:50vh;
             height:20vh;
-            overflow:scroll;
+            overflow-y:scroll;
             background-color: white;
             border-radius:15px;
             padding:20px;

@@ -129,7 +129,7 @@ export default {
         &.warn {
             color: #f8c291;
 
-            &.warn-icon {
+            & .warn-icon {
                 display: block;
                 filter: invert(96%) sepia(90%) saturate(7445%) hue-rotate(300deg) brightness(108%) contrast(95%);
                 margin-right:5px;
@@ -149,10 +149,13 @@ export default {
     .messages  {
         &__header {
             display:flex;
+            box-sizing: border-box;
+            padding:0 15px;
         }
 
         &__body {
-            height:20vh;
+            height:30vh;
+            min-height:250px;
             overflow-y:scroll;
         }
     }

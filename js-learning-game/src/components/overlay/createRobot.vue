@@ -68,8 +68,10 @@ export default {
 
             if(robotName.value.trim().length > 0) {
                 let newRobot = new Robot(robotName.value, robotColor.value);
+                newRobot.script = 'robot.turnOn()';
+                
                 store.commit('addRobotTemplate', newRobot);
-                emitter.emit('editRobot', newRobot.id)
+                emitter.emit('editRobot', newRobot.templateID);
             }
         }
 
@@ -105,6 +107,7 @@ export default {
             cursor:pointer;
             box-sizing: border-box;
             margin: 10px;
+            border-radius:50%;
             flex: 1 1 calc(30% - 20px);
             height: 46px;
             position:relative;

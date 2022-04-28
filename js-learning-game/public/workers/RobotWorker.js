@@ -16,7 +16,8 @@ let shouldRunAgain = true;
 let isPlaying = true;
 
 // count the number of instant execution loops
-let instantLoops = 0
+let instantLoops = 0;
+let scriptHasErrors = false;
 
 //-------------------------------------------------------------------------//
 // Point class
@@ -240,19 +241,25 @@ async function mainLoop() {
     // }
 
     // only run the robot's script if robot setup has been completed, and no other game conditions are breached
-    if (robot.name && robot.script && robotWorker && resources && !running && shouldRunAgain && isPlaying && mapHasResources && instantLoops <= 10) {
+    if (robot.name && robot.script && robotWorker && !scriptHasErrors && resources && !running && shouldRunAgain && isPlaying && mapHasResources && instantLoops <= 10) {
 
         running = true;
-                    postMessage({type: 'debug', message: 'main loop running'})
-        var startTime = performance.now()
-        let mainFunc = await new AsyncFunction('robot', 'print', robot.script)(robotWorker, robotWorker.sendLogMessage);
+        var startTime = performance.now();
+
+        try {
+            let mainFunc = await new AsyncFunction('robot', 'print', robot.script)(robotWorker, robotWorker.sendLogMessage);
+        } catch (err) {
+            //  stop the robot, and print error back to the user to fix
+            printMessageToConsole('danger', null, JSON.stringify(err, Object.getOwnPropertyNames(err)));
+            scriptHasErrors = true;
+        }
         // report back that the main loop has been cycled. Should return either continueWork or returnHome
         postMessage({ type: 'doneWork', robot: robot });
 
-        var endTime = performance.now()
+        var endTime = performance.now();
 
-        if ((endTime - startTime) < 20) {
-            printMessageToConsole('danger', null, `danger: infinite loop detected. Iterations before forced stop: ${10 - instantLoops}`)
+        if ((endTime - startTime) < 20 && !scriptHasErrors) {
+            printMessageToConsole('danger', null, `danger: infinite loop detected. Iterations before forced stop: ${10 - instantLoops}`);
             instantLoops += 1;
         } else {
             instantLoops = 0;
@@ -282,7 +289,8 @@ self.onmessage = function (e) {
 
             // create local copy of the robot object that can be safely modified
             robot = JSON.parse(e.data.template);
-            robot.script = `${JSON.parse(robot.script)}`
+            postMessage({ type: 'debug', message: robot });
+            //robot.script = `${JSON.parse(robot.script)}`
 
             // instantiate robotWorker class
             robotWorker = new RobotWorker(robot.id);
@@ -318,7 +326,7 @@ self.onmessage = function (e) {
         case 'continueWork':
             if (mapHasResources) {
                 robot = JSON.parse(e.data.robotInstance);
-                robot.script = `${JSON.parse(robot.script)}`;
+                //robot.script = `${JSON.parse(robot.script)}`;
                 resources = JSON.parse(e.data.resources);
                 mainLoop();
             }
@@ -327,7 +335,15 @@ self.onmessage = function (e) {
         // case for the robot being updated on the frontend
         case 'updateRobot':
             robot = JSON.parse(e.data.robotInstance);
-            robot.script = `${JSON.parse(robot.script)}`;
+            //robot.script = `${JSON.parse(robot.script)}`;
+
+            // if its a script update, clear scriptErrors and instantLoop flags
+            if (e.data.scriptUpdate) {
+                instantLoops = 0;
+                scriptHasErrors = false;
+            }
+
+            postMessage({ level: 'debug', message: JSON.stringify(robot) });
             break;
         
         // case for playstate being changed

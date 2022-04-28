@@ -2,6 +2,7 @@ import { createStore } from 'vuex';
 import { v4 as uuidv4 } from 'uuid';
 import deepClone from '../utils/clone';
 import Point from '../assets/js/maths/Point';
+import robotMessageHandler from '../utils/robotMessageHandler';
 
 export const store = createStore({
   state () {
@@ -54,13 +55,53 @@ export const store = createStore({
             // push the new resource list to the workers
             this.commit('updateResourceList');
         },
-        createRobotWorkerAndInstance(state, { instance, template }) {
+        constructRobot(state, {window, id}) {
+            console.log('building bot');
+            let template = store.state.robotTemplates.find(robot => robot.templateID === id);
+            let enoughResourcesToBuild = true;
+
+            // check if there are enough resources currently stored to build a bot
+            for (let i = 0; i < state.levelRequirements.length; i++) {
+                if (state.levelRequirements[i].harvested > 0) {
+                    continue;
+                } else {
+                    enoughResourcesToBuild = false;
+                    break;
+                }
+            }
+
+            console.log(enoughResourcesToBuild);
+
+
+            // if the template exists
+            if (template && enoughResourcesToBuild) {
+
+                console.log('NOW BUILDING');
+                // subtract one from each resource harvested count
+                for (let i = 0; i < state.levelRequirements.length; i++) {
+                    state.levelRequirements[i].harvested -= 1;
+                }
+
+                let robotInstance = new Worker('/workers/RobotWorker.js');
+
+                // add an event listener to the new worker
+                robotInstance.onmessage = (e) => {
+                    robotMessageHandler(e);
+                };
+
+                console.log(template);
+
+                this.commit('createRobotWorkerAndInstance', {instance: robotInstance, template: template, window: window});
+            }
+        },
+
+        createRobotWorkerAndInstance(state, { instance, template, window }) {
 
             // copy the robot template and make a new instance. This will
             // contain information used by the game loop for rendering the bot
             let newRobotInstance = deepClone(template);
             newRobotInstance.id = uuidv4();
-            newRobotInstance.position = new Point(960, 540);
+            newRobotInstance.position = new Point(window.innerWidth / 2, window.innerHeight / 2);
             state.robotInstances.push(newRobotInstance);
 
             // push the robot worker and the robot instance ID to link workers with their instance. 
@@ -100,24 +141,24 @@ export const store = createStore({
 
                     if (worker) {
                         console.log('updating worker...')
-                        this.commit('updateRobotInstance', instance);
+                        this.commit('updateRobotInstance', { instance: instance, scriptUpdate: true});
                         this.commit('sendContinueWork', instance);
                     }
                 });
             }
         },
 
-        updateRobotInstance(state, robot) {
-            let robotInstance = state.robotInstances.findIndex(instance => instance.id === robot.id);
+        updateRobotInstance(state, { instance, scriptUpdate = false }) {
+            let robotInstance = state.robotInstances.findIndex(rInstance => rInstance.id === instance.id);
 
             if (robotInstance !== -1) {
-                state.robotInstances[robotInstance].position = robot.position;
-                state.robotInstances[robotInstance].backpack = robot.backpack;
+                state.robotInstances[robotInstance].position = instance.position;
+                state.robotInstances[robotInstance].backpack = instance.backpack;
                 
 
                 // push update back to the worker
-                let worker = state.robotWorkers.find(instance => instance.robotInstance === robot.id);
-                worker.robotWorker.postMessage({ type: 'updateRobot', robotInstance: JSON.stringify(state.robotInstances[robotInstance]) });
+                let worker = state.robotWorkers.find(worker => worker.robotInstance === instance.id);
+                worker.robotWorker.postMessage({ type: 'updateRobot', robotInstance: JSON.stringify(state.robotInstances[robotInstance]), scriptUpdate: scriptUpdate });
             }
         },
 
@@ -214,15 +255,10 @@ export const store = createStore({
         },
 
         workerUnloadStoredResources(state, robot) {
-
-            console.log('unload command recieved')
-            console.log(robot.backpack);
-
             let requirements = state.levelRequirements;
 
             for (var i = robot.backpack.length - 1; i >= 0; i--) {
 
-                console.log(`unloading ${i}`)
                 let resource = robot.backpack[i];
                 let requirementIndex = requirements.findIndex(requirement => requirement.type === resource.type);
 
@@ -241,8 +277,7 @@ export const store = createStore({
             }
 
             // update the robot
-            console.log(robot.backpack)
-            this.commit('updateRobotInstance', robot);
+            this.commit('updateRobotInstance', { instance: robot });
         },
 
         updateResource(state, { resourceID, resource }) {
@@ -260,7 +295,7 @@ export const store = createStore({
         dumpBackpack(state, robot) {
             robot.backpack = []
 
-            this.commit('updateRobotInstance', robot);
+            this.commit('updateRobotInstance',  { instance: robot });
 
         },
 
