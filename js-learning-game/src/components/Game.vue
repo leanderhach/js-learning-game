@@ -15,6 +15,7 @@ import { getRandomInt } from '../utils/math';
 import { getSprite } from '../utils/file';
 import Iron from '../assets/js/resources/Iron';
 import Cobalt from '../assets/js/resources/Cobalt';
+import Silicon from '../assets/js/resources/Silicon';
 import getColorFilter from '../utils/getColorFilter';
 
 export default {
@@ -33,6 +34,12 @@ export default {
         const screenHeight = computed(() => window.innerHeight);
         const screenWidth = computed(() => window.innerWidth);
 
+        // store the images of each resource and bot to be drawn
+        let ironImage = null;
+        let cobaltImage = null;
+        let siliconImage = null;
+        let botImage = null;
+
         const drawMothership = () => {
             // draw the mothership. This will remain the same the entire game.
             gameContext.fillStyle = 'red';
@@ -41,7 +48,6 @@ export default {
 
         // resource creation functions
         const makeResource = (count, type) => {
-
             let resources = [];
 
             for(let i = 0; i < count; i++) {
@@ -52,29 +58,30 @@ export default {
                     case 'iron':
                         resources.push(new Iron(posX, posY));
                         break;
-
                     case 'cobalt':
                         resources.push(new Cobalt(posX, posY));
                         break;
+                    case 'silicon':
+                        resources.push(new Silicon(posX, posY));
+                        break;
+
                 }
             }
-
             store.commit('addResources', resources);
         }
 
         const drawResources = async () => {
             for (let resource of store.state.resources) {
-                let image;
-
                 switch (resource.type) {
                     case 'iron':
-                        image = await getSprite('resources', 'iron.png');
-                        gameContext.drawImage(image, resource.position.x, resource.position.y, 10, 10);
+                        gameContext.drawImage(ironImage, resource.position.x, resource.position.y, 10, 10);
                         break;
                     
                     case 'cobalt':
-                        image = await getSprite('resources', 'cobalt.png');
-                        gameContext.drawImage(image, resource.position.x, resource.position.y, 10, 10);
+                        gameContext.drawImage(cobaltImage, resource.position.x, resource.position.y, 10, 10);
+                        break;
+                    case 'silicon':
+                        gameContext.drawImage(siliconImage, resource.position.x, resource.position.y, 10, 10);
                         break;
                 }
             }
@@ -82,17 +89,19 @@ export default {
 
         const drawBots = async () => {
             for (let robot of store.state.robotInstances) {
-                let image = await getSprite('robots', 'basic_robot.png');
-
                 // set the robot's color
                 gameContext.filter = getColorFilter(robot.color);
-                gameContext.drawImage(image, robot.position.x, robot.position.y, 15, 15);
+                gameContext.drawImage(botImage, robot.position.x, robot.position.y, 15, 15);
                 gameContext.filter = "none";
             }
         }
 
-        const initGame = () => {
+        const initGame = async () => {
             gameContext = gameCanvas.value.getContext('2d');
+            ironImage = await getSprite('resources', 'iron.png');
+            cobaltImage = await getSprite('resources', 'cobalt.png');
+            siliconImage = await getSprite('resources', 'silicon.png');
+            botImage = await getSprite('robots', 'basic_robot.png');
             gameLoop();
         }
 
@@ -137,10 +146,11 @@ export default {
 
                     robotUpgrades = {
                         backpackSize: 3,
+                        speed: 160,
                     }
 
                     makeResource(25, 'iron');
-                    makeResource(5, 'cobalt');
+                    makeResource(17, 'cobalt');
                     store.commit('setLevelRequirements', { requirements, robotUpgrades})
                     break;
 
@@ -150,22 +160,30 @@ export default {
                     requirements = [
                         {
                             type: 'iron',
-                            quota: 20,
+                            quota: 40,
                             harvested: 0
                         },
                         {
                             type: 'cobalt',
-                            quota: 16,
+                            quota: 28,
+                            harvested: 0,
+                        },
+                        {
+                            type: 'silicon',
+                            quota: 20,
                             harvested: 0,
                         }
                     ]
 
                     robotUpgrades = {
-                        backpackSize: 3,
+                        backpackSize: 5,
+                        speed: 200,
                     }
 
-                    makeResource(25, 'iron');
-                    makeResource(5, 'cobalt');
+                    makeResource(30, 'iron');
+                    makeResource(32, 'cobalt');
+                    makeResource(25, 'silicon');
+
                     store.commit('setLevelRequirements', { requirements, robotUpgrades})
                     break;
             }

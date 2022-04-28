@@ -241,7 +241,7 @@ async function mainLoop() {
     // }
 
     // only run the robot's script if robot setup has been completed, and no other game conditions are breached
-    if (robot.name && robot.script && robotWorker && !scriptHasErrors && resources && !running && shouldRunAgain && isPlaying && mapHasResources && instantLoops <= 10) {
+    if (robot.name && robot.script && robotWorker && !scriptHasErrors && resources && !running && shouldRunAgain && isPlaying && mapHasResources && instantLoops <= 5) {
 
         running = true;
         var startTime = performance.now();
@@ -259,7 +259,7 @@ async function mainLoop() {
         var endTime = performance.now();
 
         if ((endTime - startTime) < 20 && !scriptHasErrors) {
-            printMessageToConsole('danger', null, `danger: infinite loop detected. Iterations before forced stop: ${10 - instantLoops}`);
+            printMessageToConsole('danger', null, `near-empty main loop. Stopping in ${5 - instantLoops} iterations`);
             instantLoops += 1;
         } else {
             instantLoops = 0;
