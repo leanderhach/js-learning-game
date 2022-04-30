@@ -127,3 +127,13 @@ input {
     border-bottom: 4px solid var(--green);
     background-color:var(--text-light);
 }
+
+code {
+    display:inline-block;
+    padding:5px;
+    background-color:var(--green);
+    border-radius:5px;
+    color:white;
+    font-family: 'Rokkitt';
+    font-weight:600;
+}

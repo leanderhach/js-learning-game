@@ -1,19 +1,23 @@
 <template>
   <!-- Progress Menu -->
-  <div class="pm content-box">
-    <h4 class="title">
-      Progress
-    </h4>
-    <div class="pm__bars">
-      <div class="progress-bar__container" v-for="(requirement, key) of levelRequirements" :key="key">
-        <div class="progress-bar__title">
-          <img v-if="requirement.type === 'iron'" class="icon" src="/sprites/resources/iron.png" alt="">
-          <h4> {{ requirement.type }}</h4>
-        </div>
-        <div class="progress-bar__bar">
-          <div 
-            :class="['progress-bar__fill', requirement.type]" 
-            :style="`width: ${ requirement.harvested / requirement.quota * 100 }%`">
+  <div class="pm">
+    <div class="content-box">
+      <h4 class="title">
+        Progress
+      </h4>
+      <div class="pm__bars">
+        <div class="progress-bar__container" v-for="(requirement, key) of levelRequirements" :key="key">
+          <div class="progress-bar__title">
+            <img v-if="requirement.type === 'iron'" class="icon" src="/sprites/resources/iron.png" alt="">
+            <img v-if="requirement.type === 'cobalt'" class="icon" src="/sprites/resources/cobalt.png" alt="">
+            <img v-if="requirement.type === 'silicon'" class="icon" src="/sprites/resources/silicon.png" alt="">
+            <h4> {{ requirement.type }}</h4>
+          </div>
+          <div class="progress-bar__bar">
+            <div 
+              :class="['progress-bar__fill', requirement.type]" 
+              :style="`width: ${ requirement.harvested / requirement.quota * 100 }%`">
+            </div>
           </div>
         </div>
       </div>
@@ -45,11 +49,21 @@ export default {
         flex-direction: column;
         width:100%;
         max-height:200px;
+        align-items: flex-end;
 
         &__bars {
           display:flex;
           align-items: center;
           flex-direction:column;
+        }
+
+        .title {
+          margin:0;
+        }
+
+        .content-box {
+          width: 50%;
+          min-width: 300px;
         }
     }
 
@@ -66,6 +80,11 @@ export default {
 
         h4 {
           margin: 0;
+          text-transform: capitalize;
+        }
+
+        .icon {
+          margin-right:5px;
         }
       }
 
@@ -88,6 +107,10 @@ export default {
 
         &.cobalt {
           background-color: var(--blue);
+        }
+
+        &.silicon {
+          background-color: var(--green);
         }
       }
     }

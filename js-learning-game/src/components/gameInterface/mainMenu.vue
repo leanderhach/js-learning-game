@@ -1,32 +1,34 @@
 <template>
   <!-- Main Menu -->
-  <div class="mm content-box">
-    <div class="mm__options">
-      <nav class="options__nav">
-        <button class="invisible-button">
-          <font-awesome-icon icon="cog" />
-        </button>
-        <button
-          v-if="isPlaying"
-          class="invisible-button"
-          @click="togglePlaying"
-        >
-          <font-awesome-icon icon="pause" />
-        </button>
-        <button
-          v-else
-          class="invisible-button"
-          @click="togglePlaying"
-        >
-          <font-awesome-icon icon="play" />
-        </button>
-        <button class="invisible-button">
-          <font-awesome-icon icon="circle-info" />
-        </button>
-      </nav>
-    </div>
-    <div class="mm__brief">
-      {{ missionBrief }}
+  <div class="mm">
+    <div class="content-box">
+      <div class="mm__options">
+        <nav class="options__nav">
+          <button class="invisible-button">
+            <font-awesome-icon icon="cog" />
+          </button>
+          <button
+            v-if="isPlaying"
+            class="invisible-button"
+            @click="togglePlaying"
+          >
+            <font-awesome-icon icon="pause" />
+          </button>
+          <button
+            v-else
+            class="invisible-button"
+            @click="togglePlaying"
+          >
+            <font-awesome-icon icon="play" />
+          </button>
+          <button class="invisible-button">
+            <font-awesome-icon icon="circle-info" />
+          </button>
+        </nav>
+      </div>
+      <div class="mm__brief">
+        {{ missionBrief }}
+      </div>
     </div>
   </div>
 </template>
@@ -69,6 +71,10 @@ export default {
         &__brief {
             margin-top: 20px;
             padding:0 20px; 
+        }
+
+        .content-box {
+          width:50%;
         }
     }
 

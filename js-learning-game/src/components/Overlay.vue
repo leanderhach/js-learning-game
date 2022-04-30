@@ -35,7 +35,6 @@ export default {
         let activeID = ref(null);
 
         const toggleOverlay = () => {
-            console.log('toggling');
             isActive.value = !isActive.value
         }
 

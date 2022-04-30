@@ -72,16 +72,11 @@ export default {
 
         onMounted(() => {
             chapterContent();
-            const store = useStore();
-
-            console.log('stuff');
-
             const container = document.querySelector('#monaco');
-            const parentContainer = document.querySelector('#monaco-container');
 
             // setup monaco
             editor = monaco.editor.create(container, {
-                value: 'robot.turnOn()',
+                value: 'robot.turnOn();',
                 language: 'javascript',
                 automaticLayout: true,
                 minimap: { enabled: false },
@@ -128,12 +123,15 @@ export default {
             width: calc(50% - 10px);
             text-align:left;
             margin-left:10px;
+            overflow-y: scroll;
+            height:95%;
         }
 
         .button-row{
           display: flex;
           flex-direction: row-reverse;
           width:100%;
+          height:5%;
         }
     }
 </style>

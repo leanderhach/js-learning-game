@@ -110,7 +110,7 @@ export default {
             let robotUpgrades;
 
             switch (currentLevel.value) {
-                case 'level1':
+                case 'level3':
                     console.log('level 1!');
                     makeResource(16, 'iron');
 
@@ -154,7 +154,7 @@ export default {
                     store.commit('setLevelRequirements', { requirements, robotUpgrades})
                     break;
 
-                case 'level3':
+                case 'level1':
                     console.log('level 3!');
 
                     requirements = [

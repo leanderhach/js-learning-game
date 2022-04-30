@@ -42,7 +42,6 @@ export default {
         let isOpen = ref(false);
 
         const editRobot = (id) => {
-          console.log(id);
             emitter.emit('editRobot', id);
         }
 

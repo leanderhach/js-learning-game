@@ -56,7 +56,6 @@ export const store = createStore({
             this.commit('updateResourceList');
         },
         constructRobot(state, {window, id}) {
-            console.log('building bot');
             let template = store.state.robotTemplates.find(robot => robot.templateID === id);
             let enoughResourcesToBuild = true;
 
@@ -70,13 +69,8 @@ export const store = createStore({
                 }
             }
 
-            console.log(enoughResourcesToBuild);
-
-
             // if the template exists
             if (template && enoughResourcesToBuild) {
-
-                console.log('NOW BUILDING');
                 // subtract one from each resource harvested count
                 for (let i = 0; i < state.levelRequirements.length; i++) {
                     state.levelRequirements[i].harvested -= 1;
@@ -88,8 +82,6 @@ export const store = createStore({
                 robotInstance.onmessage = (e) => {
                     robotMessageHandler(e);
                 };
-
-                console.log(template);
 
                 this.commit('createRobotWorkerAndInstance', {instance: robotInstance, template: template, window: window});
             }
@@ -121,26 +113,20 @@ export const store = createStore({
 
         updateRobotTemplateScript(state, robot) {
             // updates the script of a robot
-
-            console.log('updating template')
             let robotTemplate = state.robotTemplates.find(template => template.templateID === robot.templateID);
 
             if (robotTemplate) {
-
-                console.log('found robot');
                 robotTemplate.script = robot.script;
 
                 // update every robot instance with the new robot script,
                 // and update every worker
                 state.robotInstances.filter(instance => instance.templateID === robotTemplate.templateID).forEach(instance => {
 
-                    console.log(instance);
                     instance.script = robotTemplate.script;
 
                     let worker = state.robotWorkers.find(worker => worker.robotInstance === instance.id);
 
                     if (worker) {
-                        console.log('updating worker...')
                         this.commit('updateRobotInstance', { instance: instance, scriptUpdate: true});
                         this.commit('sendContinueWork', instance);
                     }
