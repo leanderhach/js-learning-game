@@ -68,7 +68,6 @@
                 }
 
                 span:nth-child(3) {
-                    font-weight: 100;
                     animation: 5s 3s loadingScreenOpacity forwards;
                 }
 

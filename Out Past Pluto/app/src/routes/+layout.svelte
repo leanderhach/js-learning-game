@@ -12,11 +12,14 @@
     <MainMenu></MainMenu>
 {/if}
 
+<NotificationOverlay></NotificationOverlay>
+
 <script lang="ts">
 	import { gameState } from "../store";
 	import { get } from "svelte/store";
 	import IntroductionScreen from "../components/loading/IntroductionScreen.svelte";
 	import MainMenu from "../components/menus/MainMenu.svelte";
+	import NotificationOverlay from "../components/notifications/NotificationOverlay.svelte";
 
     let getGameState = get(gameState);
 
