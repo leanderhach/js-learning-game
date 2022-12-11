@@ -1,0 +1,17 @@
+:root {
+	--brand-purple: #8e44ad;
+	--primary-background-color: #000000;
+	--primary-text-color: #ffffff;
+}
+
+html,
+body,
+#app {
+	height: 100%;
+	width: 100%;
+	margin: 0;
+	padding: 0;
+	overflow: hidden;
+}
+
+@import url('https://fonts.googleapis.com/css2?family=Inter:wght@100;400;500;600;700&display=swap');
