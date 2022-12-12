@@ -1,5 +1,5 @@
 <div class="form-group">
-    <input type="text" id={id} bind:value={value}>
+    <input use:typeAction id={id} bind:value={value}>
     <div class="form-group-flair"></div>
     <label for={id}>{label}</label>
     <span class="form-group__hint">{hint}</span>
@@ -16,7 +16,13 @@
     export let hint = "";
     export let id: string;
     export let value: string;
-    export let formError: FormError;
+    export let formError: FormError | null = null;
+    export let type: string = "text";
+
+    function typeAction(node: any) {
+        node.type = type;
+    }
+    
 </script>
 
 <style lang="scss">

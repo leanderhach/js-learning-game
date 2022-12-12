@@ -6,7 +6,7 @@
 
             <div class="button-group">
                 {#each popupNotification.buttons as button}
-                    <DefaultButton text={button.text} onclick={typeof button.action === "string" ? closePopup : button.action}></DefaultButton>
+                    <DefaultButton text={button.text} on:click={() => typeof button.action === "string" ? closePopup() : runAction(button.action)}></DefaultButton>
                 {/each}
             </div>
         </div>
@@ -35,6 +35,11 @@
 
     function closePopup() {
         popup.set(null);
+    }
+
+    async function runAction(action: Function) {
+        await action();
+        closePopup();
     }
 </script>
 

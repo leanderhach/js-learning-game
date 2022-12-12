@@ -1,16 +1,51 @@
-<div id="main-menu">
+<div id="main-menu" bind:clientHeight={clientHeight} bind:clientWidth={clientWidth}>
     <div id="main-menu__content">
         <GameLogo></GameLogo>
-        <DefaultButton text={"New Game"} onclick={()=> console.log('hi')}></DefaultButton>
-        <DefaultButton text={"Continue"} onclick={()=> console.log('hi')}></DefaultButton>
-        <DefaultButton text={"Settings"} onclick={()=> console.log('hi')}></DefaultButton>
-        <DefaultButton text={"Credits"} onclick={()=> console.log('hi')}></DefaultButton>
+        <DefaultButton text={"New Game"} on:click={()=> startNewGame()}></DefaultButton>
+        <DefaultButton text={"Continue"} on:click={()=> loadGame()}></DefaultButton>
+        <DefaultButton text={"Settings"} on:click={()=> openSettings()}></DefaultButton>
+        <DefaultButton text={"Credits"} on:click={()=> openCredits()}></DefaultButton>
     </div>
+
+    {#if isSettingsOpen}
+        <SettingsMenu></SettingsMenu>
+    {/if}
 </div>
 
 <script lang="ts">
+	import { gameState } from "../../store";
 	import DefaultButton from "../generics/DefaultButton.svelte";
 	import GameLogo from "../generics/GameLogo.svelte";
+	import SettingsMenu from "./SettingsMenu.svelte";
+    import CreditsMenu from "./CreditsMenu.svelte";
+	import { asteroidFields, initializeGame } from "../../gameManager";
+	import { get } from "svelte/store";
+
+    let isSettingsOpen = false;
+    let isCreditsOpen = false;
+
+    let clientHeight: number;
+    let clientWidth: number;
+
+    function startNewGame() {
+        gameState.set(2);
+        initializeGame({x: clientWidth, y: clientHeight});
+        gameState.set(3);
+
+        console.log(get(asteroidFields))
+    }
+
+    function loadGame() {
+        console.log("loading game")
+    }
+
+    function openSettings() {
+
+    }
+
+    function openCredits() {
+
+    }
 </script>
 
 <style lang="scss">
@@ -30,6 +65,10 @@
         &__content {
             display:flex;
             flex-direction: column;
+
+            * {
+                margin-top: 2em;
+            }
         }
     }
 </style>

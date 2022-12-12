@@ -2,22 +2,22 @@
     <GameLogo animated={true}></GameLogo>
     <div class="entrance-prompt">
         {#if screenState === 0}
-                <DefaultButton text={"Register"} onclick={setScreenRegister}></DefaultButton>
-                <DefaultButton text={"Login"} onclick={setScreenLogin}></DefaultButton>
-                <DefaultButton text={"Play As Guest"} style="textunderlined" onclick={startGameAsGuest}></DefaultButton>
+                <DefaultButton text={"Register"} on:click={() => setScreenRegister()}></DefaultButton>
+                <DefaultButton text={"Login"} on:click={() => setScreenLogin()}></DefaultButton>
+                <DefaultButton text={"Play As Guest"} style="textunderlined" on:click={() => startGameAsGuest()}></DefaultButton>
             {:else if screenState === 1 || screenState === 2}
                 <FormGroup label={"Email"} id={"email"} bind:value={email}></FormGroup>
-                <FormGroup label={"Password"} id={"password"} bind:value={password}></FormGroup>
+                <FormGroup label={"Password"} id={"password"} type="password" bind:value={password} formError={formError}></FormGroup>
 
                 {#if screenState === 1}
                     <div class="button-group">
-                        <DefaultButton text={"Back"} onclick={setScreenDefault} disabled={isLoading}></DefaultButton>
-                        <DefaultButton text={"Register"} onclick={register} isLoading={isLoading} disabled={!emailValid || !passwordValid}></DefaultButton>
+                        <DefaultButton text={"Back"} on:click={() => setScreenDefault()} disabled={isLoading}></DefaultButton>
+                        <DefaultButton text={"Register"} on:click={() => register()} isLoading={isLoading} disabled={!emailValid || !passwordValid}></DefaultButton>
                     </div>
                 {:else if screenState === 2}
                     <div class="button-group">
-                        <DefaultButton text={"Back"} onclick={setScreenDefault} disabled={isLoading}></DefaultButton>
-                        <DefaultButton text={"Login"} onclick={login} isLoading={isLoading} disabled={!emailValid || !passwordValid}></DefaultButton>
+                        <DefaultButton text={"Back"} on:click={() => setScreenDefault()} disabled={isLoading}></DefaultButton>
+                        <DefaultButton text={"Login"} on:click={() => login()} isLoading={isLoading} disabled={!emailValid || !passwordValid}></DefaultButton>
                     </div>
                 {/if}
         {/if}
@@ -25,15 +25,13 @@
 </div>
 
 <script lang="ts">
-	import { firestore } from "../../utils/firebase";
     import { createUserWithEmailAndPassword, getAuth, signInWithEmailAndPassword } from "firebase/auth";
-    import { doc, getDoc, setDoc } from "firebase/firestore"; 
     import DefaultButton from "../generics/DefaultButton.svelte";
 	import FormGroup from "../generics/FormGroup.svelte";
 	import GameLogo from "../generics/GameLogo.svelte";
 	import type { FormError } from "../../types/forms";
-	import { gameState } from "../../store";
-	import { createPopupNotification, createPushNotification } from "../../utils/notification";
+	import { gameState, userStore } from "../../store";
+	import { createPopupNotification } from "../../utils/notification";
 
     let email: string;
     let password: string;
@@ -42,7 +40,7 @@
     let passwordValid = false;
 
     let isLoading = false;
-    let formError: FormError;
+    let formError: FormError | null;
     let screenState = 0;
 
     $: email, checkEmail();
@@ -67,20 +65,17 @@
 
     function setScreenRegister() {
         screenState = 1;
-        email = "";
-        password = "";
     }
 
     function setScreenLogin() {
         screenState = 2;
-        email = "";
-        password = "";
     }
 
     function setScreenDefault() {
         screenState = 0;
         email = "";
         password = "";
+        formError = null;
     }
 
     function startGameAsGuest() {
@@ -110,12 +105,15 @@
             isLoading = false;
             // Signed in
             const user = userCredential.user;
+            userStore.set(user);
             startGame();
         })
         .catch((error) => {
             isLoading = false;
-            const errorCode = error.code;
-            const errorMessage = error.message;
+            formError = {
+                hasError: true,
+                errorText: error.message
+            }
         });
     }
 
@@ -128,12 +126,15 @@
                 isLoading = false;
                 // Signed in 
                 const user = userCredential.user;
+                userStore.set(user);
                 startGame();
             })
             .catch((error) => {
                 isLoading = false;
-                const errorCode = error.code;
-                const errorMessage = error.message;
+                formError = {
+                    hasError: true,
+                    errorText: error.message
+                }
         });
     }
 
@@ -161,8 +162,14 @@
 
     .entrance-prompt {
         margin-top: 5em;
-        // opacity: 0;
-        // animation: 3s 5s loadingScreenOpacity forwards;
+        display: flex;
+        flex-direction: column;
+        opacity: 0;
+        animation: 3s 5s loadingScreenOpacity forwards;
+
+        > .button:nth-child(1) {
+            margin-top: 2em;
+        }
     }
 
     @keyframes loadingScreenOpacity {

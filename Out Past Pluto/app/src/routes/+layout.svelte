@@ -12,6 +12,10 @@
     <MainMenu></MainMenu>
 {/if}
 
+{#if getGameState === 2}
+    <LoadingScreen></LoadingScreen>
+{/if}
+
 <NotificationOverlay></NotificationOverlay>
 
 <script lang="ts">
@@ -20,6 +24,7 @@
 	import IntroductionScreen from "../components/loading/IntroductionScreen.svelte";
 	import MainMenu from "../components/menus/MainMenu.svelte";
 	import NotificationOverlay from "../components/notifications/NotificationOverlay.svelte";
+	import LoadingScreen from "../components/loading/LoadingScreen.svelte";
 
     let getGameState = get(gameState);
 

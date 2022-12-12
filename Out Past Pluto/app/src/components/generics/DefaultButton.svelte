@@ -16,29 +16,30 @@
 </button>
 
 <script lang="ts">
+	import { createEventDispatcher } from "svelte";
 	import { playOneShot } from "../../utils/audio";
 	import LoadingSpinner from "./LoadingSpinner.svelte";
 
     export let text: string;
-    export let onclick: Function;
     export let disabled = false;
     export let isLoading = false;
     export let style = "default";
+
+    const dispatch = createEventDispatcher();
 
     function handleClick() {
         if(!disabled) {
             // play button click audio
             playOneShot("/audio/button-click.mp3")
 
-            // run user defined button action function
-            onclick(); 
+            // emit click event back
+            dispatch("click");
         }
     }
 </script>
 
 <style lang="scss">
     .button:not(.text-only):not(.text-underlined) {
-        margin-top: 5em;
         background-color: transparent;
         border: 1px solid var(--brand-purple);
         color: var(--primary-text-color);

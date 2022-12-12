@@ -21,6 +21,7 @@
     .game-logo {
         color: white;
         display:flex;
+        font-family: var(--primary-font-family);
 
         &__left {
             display:flex;

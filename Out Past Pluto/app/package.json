@@ -14,6 +14,7 @@
 	"devDependencies": {
 		"@sveltejs/adapter-auto": "next",
 		"@sveltejs/kit": "next",
+		"@types/uuid": "^9.0.0",
 		"@typescript-eslint/eslint-plugin": "^5.45.0",
 		"@typescript-eslint/parser": "^5.45.0",
 		"eslint": "^8.28.0",
@@ -35,6 +36,7 @@
 		"howler": "^2.2.3",
 		"pixi.js": "^7.0.4",
 		"sass": "^1.56.2",
-		"svelte-preprocess": "^4.10.7"
+		"svelte-preprocess": "^4.10.7",
+		"uuid": "^9.0.0"
 	}
 }
