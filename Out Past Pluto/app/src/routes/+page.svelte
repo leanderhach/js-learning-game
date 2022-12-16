@@ -3,9 +3,9 @@
 <script lang="ts">
     import type * as PIXI from "pixi.js";
     import * as Pixi from "pixi.js";
-	import { asteroidFields } from "../gameManager";
 	import { onMount } from "svelte";
-	import { get } from "svelte/store";
+	import Crayon from "../crayon";
+	import { RenderStore } from "../store";
 
     let gameCanvasWidth: number;
     let gameCanvasHeight: number;
@@ -35,27 +35,11 @@
         const view: any = gameCanvas.view
         document.querySelector("#game-canvas")?.appendChild(view);
 
-        const renderer = new Crayon()
-
-        // ------ GAME RENDER LOOP ------ //
-        gameCanvas.ticker.add((delta) => {
-
-            if(get(asteroidFields)){
-                for(let asteroidField of get(asteroidFields)) {
-                    for(let asteroid of asteroidField.asteroids) {
-                        const rectangle = Pixi.Sprite.from(Pixi.Texture.WHITE);
-                        rectangle.width = asteroid.size;
-                        rectangle.height = asteroid.size;
-                        rectangle.position.x = asteroid.position.x;
-                        rectangle.position.y = asteroid.position.y;
-
-                        gameCanvas.stage.addChild(rectangle);
-
-                        gameCanvas.stage.children
-                    }
-                }
-            }
-        });
+        const renderer = new Crayon({
+            canvas: gameCanvas,
+        })
+        
+        RenderStore.set(renderer);
     })
     
 </script>

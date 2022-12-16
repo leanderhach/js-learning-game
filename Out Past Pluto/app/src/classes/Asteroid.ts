@@ -7,28 +7,34 @@ import {
 	getRandomCelestialName,
 	getRandomValidComposition
 } from '../utils/generators';
-import type { OmitFunctions } from '../types/helpers';
+import type { DisplayObject } from 'pixi.js';
+import { RenderStore } from '../store';
+import { get } from 'svelte/store';
 
 export class Asteroid {
-	_id?: string = uuidv4();
+	_id: string;
+	_displayObject: DisplayObject;
 	composition: string;
 	size: number;
 	abundance: number;
 	name: string;
 	position: Point;
 
-	constructor(asteroid: Asteroid) {
+	constructor(asteroid: Omit<Asteroid, '_displayObject' | '_id'>) {
 		this.composition = asteroid.composition;
 		this.size = asteroid.size;
 		this.abundance = asteroid.abundance;
 		this.name = asteroid.name;
 		this.position = asteroid.position;
+		this._id = uuidv4();
+		this._displayObject = get(RenderStore).makeObjectRenderable(this);
+		get(RenderStore).drawOnce(this);
 	}
 }
 
 export class AsteroidField {
-	_id?: string = uuidv4();
-	asteroids?: Asteroid[];
+	_id: string = uuidv4();
+	asteroids: Asteroid[] = [];
 	position: Point;
 	name: string;
 	size: number;
@@ -60,8 +66,7 @@ export class AsteroidField {
 		}
 	}
 
-	constructor(opts: OmitFunctions<AsteroidField>) {
-		this.asteroids = opts.asteroids;
+	constructor(opts: Omit<AsteroidField, '_id' | 'asteroids' | 'generateAsteroids'>) {
 		this.position = opts.position;
 		this.name = opts.name;
 		this.size = opts.size;

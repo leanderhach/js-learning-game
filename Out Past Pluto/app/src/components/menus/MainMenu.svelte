@@ -1,25 +1,21 @@
-<div id="main-menu" bind:clientHeight={clientHeight} bind:clientWidth={clientWidth}>
-    <div id="main-menu__content">
+<div id="main-menu" class="fitted-menu">
         <GameLogo></GameLogo>
+        <div class="spacer mt-2"></div>
         <DefaultButton text={"New Game"} on:click={()=> startNewGame()}></DefaultButton>
         <DefaultButton text={"Continue"} on:click={()=> loadGame()}></DefaultButton>
         <DefaultButton text={"Settings"} on:click={()=> openSettings()}></DefaultButton>
         <DefaultButton text={"Credits"} on:click={()=> openCredits()}></DefaultButton>
-    </div>
-
-    {#if isSettingsOpen}
-        <SettingsMenu></SettingsMenu>
-    {/if}
 </div>
+<div class="client-check" bind:clientHeight={clientHeight} bind:clientWidth={clientWidth}></div>
 
 <script lang="ts">
-	import { gameState } from "../../store";
+	import { gameState, RenderStore } from "../../store";
 	import DefaultButton from "../generics/DefaultButton.svelte";
 	import GameLogo from "../generics/GameLogo.svelte";
-	import SettingsMenu from "./SettingsMenu.svelte";
-    import CreditsMenu from "./CreditsMenu.svelte";
-	import { asteroidFields, initializeGame } from "../../gameManager";
 	import { get } from "svelte/store";
+	import { Asteroid } from "../../classes/Asteroid";
+	import { getRandomInRange } from "../../utils/generators";
+	import { initializeGame } from "../../gameManager";
 
     let isSettingsOpen = false;
     let isCreditsOpen = false;
@@ -27,12 +23,21 @@
     let clientHeight: number;
     let clientWidth: number;
 
-    function startNewGame() {
-        gameState.set(2);
-        initializeGame({x: clientWidth, y: clientHeight});
-        gameState.set(3);
+    function doSetTimeout(movingAsteroid: any) {
+        setTimeout(function() {
+            movingAsteroid.position.x += 5;
+            movingAsteroid.position.y += 5;
+            get(RenderStore).drawOnce(movingAsteroid);
+        }, 200);
+    }
 
-        console.log(get(asteroidFields))
+    function timeout(ms: number) {
+    return new Promise(resolve => setTimeout(resolve, ms));
+    }
+
+    async function startNewGame() {
+        gameState.set(3);
+        initializeGame({x: clientWidth, y: clientHeight});
     }
 
     function loadGame() {
@@ -49,26 +54,9 @@
 </script>
 
 <style lang="scss">
-        #main-menu {
+    .client-check {
         position: absolute;
-        height: 100%;
         width:100%;
-        background-color: #000000;
-        top: 0;
-        left: 0;
-        font-family: 'Inter', sans-serif;
-        display: flex;
-        align-items: center;
-        justify-content: center;
-        flex-direction: column;
-
-        &__content {
-            display:flex;
-            flex-direction: column;
-
-            * {
-                margin-top: 2em;
-            }
-        }
+        height:100%;
     }
 </style>

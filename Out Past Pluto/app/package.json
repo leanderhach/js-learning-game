@@ -34,6 +34,7 @@
 		"@types/howler": "^2.2.7",
 		"firebase": "^9.15.0",
 		"howler": "^2.2.3",
+		"monaco-editor": "^0.34.1",
 		"pixi.js": "^7.0.4",
 		"sass": "^1.56.2",
 		"svelte-preprocess": "^4.10.7",

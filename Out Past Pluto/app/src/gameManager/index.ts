@@ -14,7 +14,7 @@ export function initializeGame(canvasDimensions: Point) {
 		const field = new AsteroidField({
 			name: getRandomCelestialName(),
 			position: generatePointInArea(canvasDimensions),
-			size: 60,
+			size: getRandomInRange(90, 150),
 			generationSettings: {
 				count: 20,
 				abundance: getRandomInRange(50, 90)

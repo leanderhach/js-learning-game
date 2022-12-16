@@ -22,4 +22,47 @@ body,
 	}
 }
 
+.spacer {
+	&.mt-2 {
+		margin-top: 2em;
+	}
+}
+
+.fitted-menu {
+	display: flex;
+	flex-direction: column;
+	padding: 2em;
+	width: max-content;
+	background-color: var(--primary-background-color);
+	pointer-events: all;
+	position: relative;
+
+	&.outlined {
+		border: 1px solid var(--brand-purple);
+
+		&::after,
+		&::before {
+			content: '';
+			position: absolute;
+			background-color: var(--brand-purple);
+			left: 0;
+		}
+
+		&::after {
+			width: 1px;
+			left: -1px;
+			height: 2em;
+			top: -1em;
+			border-bottom: 15px solid var(--primary-background-color);
+		}
+
+		&::before {
+			left: -1em;
+			width: 2em;
+			height: 1px;
+			top: -1px;
+			border-right: 15px solid var(--primary-background-color);
+		}
+	}
+}
 @import url('https://fonts.googleapis.com/css2?family=Inter:wght@100;200;300;400;500;600;700&display=swap');

@@ -1,4 +1,5 @@
 import type { User } from 'firebase/auth';
+import type Crayon from '../crayon';
 import { writable } from 'svelte/store';
 
 // Game States
@@ -12,3 +13,4 @@ import { writable } from 'svelte/store';
 
 export const gameState = writable<number>(0);
 export const userStore = writable<null | User>(null);
+export const RenderStore = writable<Crayon>();

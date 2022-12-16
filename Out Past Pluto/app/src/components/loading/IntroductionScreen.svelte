@@ -32,6 +32,7 @@
 	import type { FormError } from "../../types/forms";
 	import { gameState, userStore } from "../../store";
 	import { createPopupNotification } from "../../utils/notification";
+	import { app } from "../../utils/firebase";
 
     let email: string;
     let password: string;
@@ -99,7 +100,7 @@
     async function register() {
         isLoading = true;
 
-        const auth = getAuth();
+        const auth = getAuth(app);
         createUserWithEmailAndPassword(auth, email, password)
         .then((userCredential) => {
             isLoading = false;
@@ -119,7 +120,7 @@
 
     async function login() {
         isLoading = true;
-        const auth = getAuth();
+        const auth = getAuth(app);
 
         signInWithEmailAndPassword(auth, email, password)
             .then((userCredential) => {
@@ -139,6 +140,7 @@
     }
 
     async function startGame() {
+        console.log("starting game")
         gameState.set(1);
     }
 
@@ -165,7 +167,7 @@
         display: flex;
         flex-direction: column;
         opacity: 0;
-        animation: 3s 5s loadingScreenOpacity forwards;
+        animation: 0s 0s loadingScreenOpacity forwards;
 
         > .button:nth-child(1) {
             margin-top: 2em;
